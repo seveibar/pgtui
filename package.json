@@ -1,6 +1,6 @@
 {
-  "name": "readable-pg-dump",
-  "version": "1.0.0",
+  "name": "pgtui",
+  "version": "0.0.0",
   "main": "index.js",
   "license": "MIT",
   "scripts": {
