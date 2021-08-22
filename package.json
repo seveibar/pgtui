@@ -1,0 +1,13 @@
+{
+  "name": "readable-pg-dump",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "ava": "^3.15.0"
+  },
+  "dependencies": {
+    "pg-query-parser": "^0.2.5",
+    "pgsql-parser": "^13.1.6"
+  }
+}
