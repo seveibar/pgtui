@@ -1,4 +1,8 @@
-export type Column = {}
+export type Column = {
+  name: string
+  type: string
+  query: string
+}
 
 export type View = {
   name: string
@@ -50,6 +54,7 @@ export type Table = {
 }
 
 export type Schema = {
+  name: string
   tables: {
     [tableName: string]: Table
   }
