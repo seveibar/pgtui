@@ -1,6 +1,7 @@
 export namespace pg {
   export type Statement =
     | AlterTableStmt
+    | AlterSeqStmt
     | CreateTriggerStmt
     | ViewStmt
     | AlterOwnerStmt
@@ -32,6 +33,20 @@ export namespace pg {
     AlterTableCmd: {
       subtype: "AT_EnableRowSecurity"
       behavior: "DROP_RESTRICT"
+    }
+  }
+
+  export type DefElm = {
+    DefElm: {
+      defname: "owned_by"
+      arg: ValueObject
+    }
+  }
+
+  export type AlterSeqStmt = {
+    AlterSeqStmt: {
+      sequence: Relation
+      options: Array<DefElm>
     }
   }
 

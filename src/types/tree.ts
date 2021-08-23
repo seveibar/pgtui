@@ -38,7 +38,10 @@ export type PgFunction = {
   name: string
   isTriggerFunction: boolean
 }
-export type Sequence = {}
+export type Sequence = {
+  name: string
+  alterations: Array<TableAlteration>
+}
 
 export type Table = {
   name: string
@@ -69,6 +72,7 @@ export type Schema = {
   }
   grants: Array<Grant>
   owner: string
+  _tablelessSequences: { [sequenceName: string]: Sequence }
 }
 
 export type Extension = {
@@ -80,5 +84,6 @@ export type Database = {
   schemas: {
     [schemaName: string]: Schema
   }
+  misc: Array<string>
   extensions: Array<Extension>
 }

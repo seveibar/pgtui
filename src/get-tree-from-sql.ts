@@ -1,9 +1,9 @@
-import { CreateSeqStmt } from "./types/pg"
 import { Database, Table } from "./types/tree"
 import { pg } from "./types"
 import * as pgParser from "pgsql-parser"
 import fs from "fs"
 import path from "path"
+import deparsePg from "./deparse-pg"
 
 export const getTreeFromSQL = (content: string) => {
   const statements: Array<pg.Statement> = pgParser
@@ -13,6 +13,7 @@ export const getTreeFromSQL = (content: string) => {
   const db: Database = {
     schemas: {},
     extensions: [],
+    misc: [],
   }
 
   const unassignedSequences = []
@@ -25,12 +26,17 @@ export const getTreeFromSQL = (content: string) => {
         views: {},
         functions: {},
         grants: [],
+        _tablelessSequences: {},
         owner: "",
       }
   }
 
   for (const stmt of statements) {
-    console.log("\n", pgParser.deparse(stmt), stmt)
+    try {
+      console.log("\n", deparsePg(stmt), stmt)
+    } catch (e) {
+      console.log("\n", stmt)
+    }
     if ("CreateStmt" in stmt) {
       const { schemaname, relname } = stmt.CreateStmt.relation
       const table: Table = {
@@ -39,10 +45,10 @@ export const getTreeFromSQL = (content: string) => {
           .filter((a) => "ColumnDef" in a)
           .map((a) => {
             const { colname, typeName } = a.ColumnDef
-            const type = typeName.names.map(pgParser.deparse).pop() as string
-            return { name: colname, type, query: pgParser.deparse(a) }
+            const type = typeName.names.map(deparsePg).pop() as string
+            return { name: colname, type, query: deparsePg(a) }
           }),
-        query: pgParser.deparse(stmt),
+        query: deparsePg(stmt),
         alterations: [],
         policies: {},
         triggers: {},
@@ -64,7 +70,7 @@ export const getTreeFromSQL = (content: string) => {
         grants: [],
         triggers: {},
         alterations: [],
-        query: pgParser.deparse(query),
+        query: deparsePg(query),
         owner: "",
       }
       continue
@@ -73,17 +79,11 @@ export const getTreeFromSQL = (content: string) => {
     if ("CreateSeqStmt" in stmt) {
       const { schemaname, relname } = stmt.CreateSeqStmt.sequence
       createSchemaIfNotExists(schemaname)
-      unassignedSequences.push(stmt)
+      db.schemas[schemaname]._tablelessSequences[relname] = {
+        name: relname,
+        alterations: [],
+      }
       continue
-      // console.log(pgParser.deparse(stmt.CreateSeqStmt.options))
-      // console.log(stmt.CreateSeqStmt.options)
-      // unassignedSequences.push(stmt)
-      // continue
-      // db.schemas[schemaname].sequences[relname] = {
-      //   name: relname,
-      //   query: pgParser.deparse(stmt),
-      // }
-      // continue
     }
 
     if ("AlterTableStmt" in stmt) {
@@ -91,26 +91,39 @@ export const getTreeFromSQL = (content: string) => {
       const target =
         db.schemas[schemaname].tables[relname] ||
         db.schemas[schemaname].views[relname] ||
-        target.alterations.push({
-          query: pgParser.deparse(stmt),
-        })
+        db.schemas[schemaname]._tablelessSequences[relname]
+
+      target.alterations.push({
+        query: deparsePg(stmt),
+      })
       continue
     }
 
     if ("GrantStmt" in stmt) {
       const { is_grant, targtype, objtype, objects, grantees } = stmt.GrantStmt
+      const targetName = deparsePg(objects)
       if (objtype === "OBJECT_SCHEMA") {
-        console.log(pgParser.deparse(objects))
-        // db.schema[]
+        console.log()
+        db.schemas[targetName].grants.push({
+          query: deparsePg(stmt),
+        })
       } else if (objtype === "OBJECT_TABLE") {
+        const [schemaname, tablename] = targetName.split(".")
+        db.schemas[schemaname].tables[tablename].grants.push({
+          query: deparsePg(stmt),
+        })
+      } else {
+        throw new Error(`Unhandled objtype in GrantStmt: "${objtype}"`)
       }
       continue
-      // is_grant: boolean
-      // targtype: "ACL_TARGET_OBJECT"
-      // objtype: "OBJECT_SCHEMA"
-      // objects: Array<ValueObject>
-      // grantees: Array<RoleSpec>
     }
+
+    if ("VariableSetStmt" in stmt) {
+      db.misc.push(deparsePg(stmt))
+      continue
+    }
+
+    throw new Error(`Unhandled stmt: "${Object.keys(stmt)[0]}"`)
   }
 
   return db
