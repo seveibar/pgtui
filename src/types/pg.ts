@@ -28,6 +28,7 @@ export namespace pg {
     | "OBJECT_SCHEMA"
     | "OBJECT_TABLE"
     | "OBJECT_FUNCTION"
+    | "OBJECT_SEQUENCE"
 
   export type CommentStmt = {
     CommentStmt: {
@@ -168,16 +169,18 @@ export namespace pg {
   }
 
   export type CreatePolicyStmt = {
-    policy_name: string
-    table: Relation
-    cmd_name: string
-    permissive: boolean
-    roles: Array<{
-      RoleSpec: {
-        roletype: "ROLESPEC_CSTRING"
-        rolename: string
-      }
-    }>
-    qual: Expression
+    CreatePolicyStmt: {
+      policy_name: string
+      table: Relation
+      cmd_name: string
+      permissive: boolean
+      roles: Array<{
+        RoleSpec: {
+          roletype: "ROLESPEC_CSTRING"
+          rolename: string
+        }
+      }>
+      qual: Expression
+    }
   }
 }

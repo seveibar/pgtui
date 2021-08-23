@@ -30,6 +30,7 @@ export type Grant = {
 }
 
 export type Trigger = {
+  name: string
   functionName: string
   query: string
 }
@@ -41,6 +42,7 @@ export type PgFunction = {
 }
 export type Sequence = {
   name: string
+  grants: Array<Grant>
   alterations: Array<TableAlteration>
   owner: string
 }

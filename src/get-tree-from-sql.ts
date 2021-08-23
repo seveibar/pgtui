@@ -142,6 +142,37 @@ export const getTreeFromSQL = (content: string) => {
       continue
     }
 
+    if ("CreateTrigStmt" in stmt) {
+      const {
+        relation: { schemaname, relname },
+        trigname,
+        funcname,
+        row,
+        timing,
+        events,
+      } = stmt.CreateTrigStmt
+
+      db.schemas[schemaname].tables[relname].triggers[trigname] = {
+        name: trigname,
+        functionName: deparsePg(funcname),
+        query: deparsePg(stmt),
+      }
+      continue
+    }
+
+    if ("CreatePolicyStmt" in stmt) {
+      const { policy_name, table, cmd_name, permissive, roles, qual } =
+        stmt.CreatePolicyStmt
+
+      db.schemas[table.schemaname].tables[table.relname].policies[policy_name] =
+        {
+          name: policy_name,
+          query: deparsePg(stmt),
+        }
+
+      continue
+    }
+
     if ("ViewStmt" in stmt) {
       const { view, query } = stmt.ViewStmt
       createSchemaIfNotExists(view.schemaname)
@@ -162,6 +193,7 @@ export const getTreeFromSQL = (content: string) => {
       createSchemaIfNotExists(schemaname)
       db.schemas[schemaname]._tablelessSequences[relname] = {
         name: relname,
+        grants: [],
         alterations: [],
         owner: "",
       }
@@ -191,7 +223,15 @@ export const getTreeFromSQL = (content: string) => {
         })
       } else if (objtype === "OBJECT_TABLE") {
         const [schemaname, tablename] = targetName.split(".")
-        db.schemas[schemaname].tables[tablename].grants.push({
+        const target =
+          db.schemas[schemaname].tables[tablename] ||
+          db.schemas[schemaname].views[tablename]
+        target.grants.push({
+          query: deparsePg(stmt),
+        })
+      } else if (objtype === "OBJECT_SEQUENCE") {
+        const [schemaname, seqname] = targetName.split(".")
+        findSequence(schemaname, seqname).grants.push({
           query: deparsePg(stmt),
         })
       } else {
@@ -200,10 +240,14 @@ export const getTreeFromSQL = (content: string) => {
       continue
     }
 
+    if ("CreateExtensionStmt" in stmt) {
+      db.extensions.push({ query: deparsePg(stmt) })
+      continue
+    }
+
     if (
       "VariableSetStmt" in stmt ||
       "SelectStmt" in stmt ||
-      "CreateExtensionStmt" in stmt ||
       "CommentStmt" in stmt
     ) {
       db.misc.push({ query: deparsePg(stmt) })
