@@ -16,8 +16,9 @@
   },
   "dependencies": {
     "mkdirp": "^1.0.4",
+    "pg-formatter": "^1.2.0",
     "pg-query-parser": "^0.2.5",
     "pgsql-parser": "^13.1.6",
-    "rimraf": "^3.0.2"
+    "rmfr": "^2.0.0"
   }
 }

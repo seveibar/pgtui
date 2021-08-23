@@ -44,8 +44,6 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
   }
 
   for (const stmt of statements) {
-    console.log("\n", deparsePg(stmt), stmt)
-
     if ("CreateSchemaStmt" in stmt) {
       createSchemaIfNotExists(stmt.CreateSchemaStmt.schemaname)
       continue
@@ -58,7 +56,6 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         db.schemas[targetName].owner = newowner.rolename
       } else if (objectType === "OBJECT_FUNCTION") {
         const [schemaname, funcname] = targetName.split(".")
-        console.log({ schema: schemaname, func: funcname, db })
         db.schemas[schemaname].functions[funcname].owner = newowner.rolename
       } else {
         throw new Error(
@@ -218,7 +215,6 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       const { is_grant, targtype, objtype, objects, grantees } = stmt.GrantStmt
       const targetName = deparsePg(objects)
       if (objtype === "OBJECT_SCHEMA") {
-        console.log()
         db.schemas[targetName].grants.push({
           query: deparsePg(stmt),
         })

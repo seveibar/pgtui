@@ -1,7 +1,9 @@
 import { DatabaseTree } from "~/types"
 import mkdirp from "mkdirp"
-import rimraf from "rimraf"
+import rmfr from "rmfr"
+import fs from "fs/promises"
 import path from "path"
+import { format as formatSQL } from "pg-formatter"
 
 const section = (title, content) => {
   return `--\n-- ${title}\n--\n\n${content}\n\n\n`
@@ -9,7 +11,7 @@ const section = (title, content) => {
 
 const render = (queries: Array<{ query: string }> | { query: string }) => {
   const queriesList = Array.isArray(queries) ? queries : [queries]
-  return queriesList.map(({ query }) => query + ";\n\n")
+  return formatSQL(queriesList.map(({ query }) => query + ";").join("\n\n"))
 }
 
 export const treeToDirectoryStructure = (
@@ -30,12 +32,13 @@ export const treeToDirectoryStructure = (
 }
 
 export const treeToDirectory = async (db: DatabaseTree, outputDir: string) => {
-  await rimraf(outputDir)
+  await rmfr(outputDir)
   await mkdirp(outputDir)
   const dirStructure = treeToDirectoryStructure(db)
   for (const filePath in dirStructure) {
     const fullFilePath = path.resolve(outputDir, filePath)
     await mkdirp(path.dirname(fullFilePath))
+    await fs.writeFile(fullFilePath, dirStructure[filePath])
   }
 }
 
