@@ -2,7 +2,6 @@ export namespace pg {
   export type Statement =
     | AlterTableStmt
     | CreateTriggerStmt
-    | CreateSequenceStmt
     | ViewStmt
     | AlterOwnerStmt
     | VariableSetStmt
@@ -11,6 +10,7 @@ export namespace pg {
     | CreateSchemaStmt
     | GrantStmt
     | CreatePolicyStmt
+    | CreateSeqStmt
 
   export type ValueObject = {
     String: { str: string }
@@ -63,11 +63,19 @@ export namespace pg {
       oncommit: "ONCOMMIT_NOOP"
     }
   }
+
+  export type CreateSeqStmt = {
+    CreateSeqStmt: {
+      sequence: Relation
+      options: Array<ValueObject>
+    }
+  }
+
   export type GrantStmt = {
     GrantStmt: {
       is_grant: boolean
       targtype: "ACL_TARGET_OBJECT"
-      objtype: "OBJECT_SCHEMA"
+      objtype: "OBJECT_SCHEMA" | "OBJECT_TABLE"
       objects: Array<ValueObject>
       grantees: Array<RoleSpec>
     }
@@ -99,7 +107,6 @@ export namespace pg {
     }
   }
   export type CreateTriggerStmt = { CreateTriggerStmt: {} }
-  export type CreateSequenceStmt = { CreateSequenceStmt: {} }
 
   export type Expression = {}
 

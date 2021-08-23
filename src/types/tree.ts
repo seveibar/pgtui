@@ -12,6 +12,7 @@ export type View = {
   triggers: {
     [triggerName: string]: Trigger
   }
+  alterations: Array<TableAlteration>
   owner: string
 }
 
@@ -37,6 +38,7 @@ export type PgFunction = {
   name: string
   isTriggerFunction: boolean
 }
+export type Sequence = {}
 
 export type Table = {
   name: string
@@ -49,6 +51,7 @@ export type Table = {
     [triggerName: string]: Trigger
   }
   alterations: Array<TableAlteration>
+  sequences: Array<Sequence>
   grants: Array<Grant>
   owner: string
 }
@@ -64,6 +67,7 @@ export type Schema = {
   functions: {
     [functionName: string]: PgFunction
   }
+  grants: Array<Grant>
   owner: string
 }
 
