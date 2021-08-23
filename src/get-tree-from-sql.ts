@@ -1,16 +1,16 @@
-import { Database, Table } from "./types/tree"
+import { DatabaseTree, Table } from "./types/tree"
 import { pg } from "./types"
 import * as pgParser from "pgsql-parser"
 import fs from "fs"
 import path from "path"
 import deparsePg from "./deparse-pg"
 
-export const getTreeFromSQL = (content: string) => {
+export const getTreeFromSQL = (content: string): DatabaseTree => {
   const statements: Array<pg.Statement> = pgParser
     .parse(content)
     .map((s) => s.RawStmt.stmt)
 
-  const db: Database = {
+  const db: DatabaseTree = {
     schemas: {},
     extensions: [],
     misc: [],

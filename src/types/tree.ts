@@ -84,7 +84,7 @@ export type Extension = {
   query: string
 }
 
-export type Database = {
+export type DatabaseTree = {
   schemas: {
     [schemaName: string]: Schema
   }

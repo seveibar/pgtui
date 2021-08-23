@@ -15,7 +15,9 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "mkdirp": "^1.0.4",
     "pg-query-parser": "^0.2.5",
-    "pgsql-parser": "^13.1.6"
+    "pgsql-parser": "^13.1.6",
+    "rimraf": "^3.0.2"
   }
 }

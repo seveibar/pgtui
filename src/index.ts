@@ -6,5 +6,6 @@ const content = fs
   .readFileSync(path.resolve(__dirname, "..", "tests", "structure.sql"))
   .toString()
 
-console.log(JSON.stringify(getTreeFromSQL(content), null, "  "))
+const db = getTreeFromSQL(content)
+console.log(JSON.stringify(db, null, "  "))
 // getTreeFromSQL(content)
