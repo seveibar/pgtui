@@ -42,6 +42,7 @@ export type PgFunction = {
 }
 export type Sequence = {
   name: string
+  query: string
   grants: Array<Grant>
   alterations: Array<TableAlteration>
   owner: string

@@ -194,6 +194,7 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         grants: [],
         alterations: [],
         owner: "",
+        query: deparsePg(stmt),
       }
       continue
     }
