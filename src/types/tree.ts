@@ -80,7 +80,7 @@ export type Schema = {
 }
 
 export type Extension = {
-  extensionName: string
+  name: string
   query: string
 }
 

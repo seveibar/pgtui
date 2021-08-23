@@ -21,6 +21,7 @@ export namespace pg {
     | DefElem
     | Constraint
     | Relation
+    | ColumnDef
     | Array<Expression>
 
   export type ObjectType =

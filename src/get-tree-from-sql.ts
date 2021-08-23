@@ -75,9 +75,10 @@ export const getTreeFromSQL = (content: string) => {
         throw new Error(
           "Only ownernership change alter sequences are implemented"
         )
-      const newowner = ownedByDef.DefElem.arg.List.items
-        .map(deparsePg)
-        .join(".")
+      const newowner =
+        "List" in ownedByDef.DefElem.arg
+          ? ownedByDef.DefElem.arg.List.items.map(deparsePg).join(".")
+          : deparsePg(ownedByDef.DefElem.arg)
 
       const seq = findSequence(sequence.schemaname, sequence.relname)
 
@@ -241,7 +242,10 @@ export const getTreeFromSQL = (content: string) => {
     }
 
     if ("CreateExtensionStmt" in stmt) {
-      db.extensions.push({ query: deparsePg(stmt) })
+      db.extensions.push({
+        query: deparsePg(stmt),
+        name: stmt.CreateExtensionStmt.extname,
+      })
       continue
     }
 

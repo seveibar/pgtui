@@ -4,7 +4,11 @@ import { pg } from "./types/pg"
 export const deparsePg = (exp: pg.Statement | pg.Expression) => {
   if ("DefElem" in exp) {
     if (exp.DefElem.defname === "owned_by") {
-      return `OWNED BY ${exp.DefElem.arg.List.items.map(deparsePg).join(".")}`
+      return `OWNED BY ${
+        "List" in exp.DefElem.arg
+          ? exp.DefElem.arg.List.items.map(deparsePg).join(".")
+          : deparsePg(exp.DefElem.arg)
+      }`
     } else {
       throw new Error(`Unsupported DefElem: ${JSON.stringify(exp)}`)
     }
