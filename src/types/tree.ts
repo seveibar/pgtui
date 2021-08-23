@@ -36,11 +36,13 @@ export type Trigger = {
 
 export type PgFunction = {
   name: string
-  isTriggerFunction: boolean
+  owner: string
+  query: string
 }
 export type Sequence = {
   name: string
   alterations: Array<TableAlteration>
+  owner: string
 }
 
 export type Table = {
@@ -84,6 +86,6 @@ export type Database = {
   schemas: {
     [schemaName: string]: Schema
   }
-  misc: Array<string>
+  misc: Array<{ query: string }>
   extensions: Array<Extension>
 }

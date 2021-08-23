@@ -18,7 +18,7 @@ export const getTreeFromSQL = (content: string) => {
 
   const unassignedSequences = []
 
-  const createSchemaIfNotExists = (schemaname: string) => {
+  function createSchemaIfNotExists(schemaname: string) {
     if (!db.schemas[schemaname])
       db.schemas[schemaname] = {
         name: schemaname,
@@ -31,12 +31,74 @@ export const getTreeFromSQL = (content: string) => {
       }
   }
 
-  for (const stmt of statements) {
-    try {
-      console.log("\n", deparsePg(stmt), stmt)
-    } catch (e) {
-      console.log("\n", stmt)
+  function findSequence(schemaname: string, sequencename: string) {
+    const schema = db.schemas[schemaname]
+    if (schema._tablelessSequences[sequencename])
+      return schema._tablelessSequences[sequencename]
+    for (const tableName in schema.tables) {
+      const table = schema.tables[tableName]
+      const seq = table.sequences.find((s) => s.name === sequencename)
+      if (seq) return seq
     }
+    throw new Error(`Couldn't find sequence: ${schemaname}.${sequencename}`)
+  }
+
+  for (const stmt of statements) {
+    console.log("\n", deparsePg(stmt), stmt)
+
+    if ("CreateSchemaStmt" in stmt) {
+      createSchemaIfNotExists(stmt.CreateSchemaStmt.schemaname)
+      continue
+    }
+
+    if ("AlterOwnerStmt" in stmt) {
+      const { objectType, object, newowner } = stmt.AlterOwnerStmt
+      const targetName = deparsePg(object)
+      if (objectType === "OBJECT_SCHEMA") {
+        db.schemas[targetName].owner = newowner.rolename
+      } else if (objectType === "OBJECT_FUNCTION") {
+        const [schemaname, funcname] = targetName.split(".")
+        console.log({ schema: schemaname, func: funcname, db })
+        db.schemas[schemaname].functions[funcname].owner = newowner.rolename
+      } else {
+        throw new Error(
+          `Unsupported object type in AlterOwnerStmt: ${objectType}`
+        )
+      }
+      continue
+    }
+
+    if ("AlterSeqStmt" in stmt) {
+      const { sequence, options } = stmt.AlterSeqStmt
+      const ownedByDef = options.find((o) => o.DefElem.defname === "owned_by")
+      if (!ownedByDef)
+        throw new Error(
+          "Only ownernership change alter sequences are implemented"
+        )
+      const newowner = ownedByDef.DefElem.arg.List.items
+        .map(deparsePg)
+        .join(".")
+
+      const seq = findSequence(sequence.schemaname, sequence.relname)
+
+      if (seq.owner)
+        throw new Error(
+          "Sequence owner has been set more than once (not implemented)"
+        )
+
+      seq.owner = newowner
+
+      delete db.schemas[sequence.schemaname]._tablelessSequences[
+        sequence.relname
+      ]
+
+      const [, ownerTableName] = newowner.split(".")
+
+      db.schemas[sequence.schemaname].tables[ownerTableName].sequences.push(seq)
+
+      continue
+    }
+
     if ("CreateStmt" in stmt) {
       const { schemaname, relname } = stmt.CreateStmt.relation
       const table: Table = {
@@ -61,6 +123,25 @@ export const getTreeFromSQL = (content: string) => {
       continue
     }
 
+    if ("CreateFunctionStmt" in stmt) {
+      const {
+        funcname: fullFuncName,
+        returnType,
+        options,
+      } = stmt.CreateFunctionStmt
+      const [schemaname, funcname] = deparsePg(fullFuncName)
+        // TODO this replace may be due to a pgsql-parser bug, PR to fix it
+        .replace("\n\n", ".")
+        .split(".")
+      createSchemaIfNotExists(schemaname)
+      db.schemas[schemaname].functions[funcname] = {
+        name: funcname,
+        query: deparsePg(stmt),
+        owner: "",
+      }
+      continue
+    }
+
     if ("ViewStmt" in stmt) {
       const { view, query } = stmt.ViewStmt
       createSchemaIfNotExists(view.schemaname)
@@ -82,6 +163,7 @@ export const getTreeFromSQL = (content: string) => {
       db.schemas[schemaname]._tablelessSequences[relname] = {
         name: relname,
         alterations: [],
+        owner: "",
       }
       continue
     }
@@ -118,8 +200,13 @@ export const getTreeFromSQL = (content: string) => {
       continue
     }
 
-    if ("VariableSetStmt" in stmt) {
-      db.misc.push(deparsePg(stmt))
+    if (
+      "VariableSetStmt" in stmt ||
+      "SelectStmt" in stmt ||
+      "CreateExtensionStmt" in stmt ||
+      "CommentStmt" in stmt
+    ) {
+      db.misc.push({ query: deparsePg(stmt) })
       continue
     }
 

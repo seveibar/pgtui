@@ -2,7 +2,7 @@ export namespace pg {
   export type Statement =
     | AlterTableStmt
     | AlterSeqStmt
-    | CreateTriggerStmt
+    | CreateTrigStmt
     | ViewStmt
     | AlterOwnerStmt
     | VariableSetStmt
@@ -12,10 +12,44 @@ export namespace pg {
     | GrantStmt
     | CreatePolicyStmt
     | CreateSeqStmt
+    | CreateExtensionStmt
+    | CommentStmt
 
-  export type ValueObject = {
-    String: { str: string }
+  export type Expression =
+    | ValueObject
+    | RoleSpec
+    | DefElem
+    | Constraint
+    | Relation
+    | Array<Expression>
+
+  export type ObjectType =
+    | "OBJECT_EXTENSION"
+    | "OBJECT_SCHEMA"
+    | "OBJECT_TABLE"
+    | "OBJECT_FUNCTION"
+
+  export type CommentStmt = {
+    CommentStmt: {
+      objtype: ObjectType
+      object: ValueObject
+      comment: string
+    }
   }
+
+  export type CreateExtensionStmt = {
+    CreateExtensionStmt: {
+      extname: string
+      if_not_exists: boolean
+      options: Array<ValueObject>
+    }
+  }
+
+  export type ValueObject =
+    | {
+        String: { str: string }
+      }
+    | { List: { items: Array<ValueObject> } }
 
   export type RoleSpec = {
     roletype: "ROLESPEC_CSTRING"
@@ -36,8 +70,8 @@ export namespace pg {
     }
   }
 
-  export type DefElm = {
-    DefElm: {
+  export type DefElem = {
+    DefElem: {
       defname: "owned_by"
       arg: ValueObject
     }
@@ -46,7 +80,7 @@ export namespace pg {
   export type AlterSeqStmt = {
     AlterSeqStmt: {
       sequence: Relation
-      options: Array<DefElm>
+      options: Array<DefElem>
     }
   }
 
@@ -54,7 +88,7 @@ export namespace pg {
     AlterTableStmt: {
       relation: Relation
       cmds: Array<Command>
-      relkind: "OBJECT_TABLE"
+      relkind: ObjectType
     }
   }
 
@@ -90,7 +124,7 @@ export namespace pg {
     GrantStmt: {
       is_grant: boolean
       targtype: "ACL_TARGET_OBJECT"
-      objtype: "OBJECT_SCHEMA" | "OBJECT_TABLE"
+      objtype: ObjectType
       objects: Array<ValueObject>
       grantees: Array<RoleSpec>
     }
@@ -111,6 +145,7 @@ export namespace pg {
   export type VariableSetStmt = { VariableSetStmt: {} }
   export type AlterOwnerStmt = {
     AlterOwnerStmt: {
+      objectType: ObjectType
       object: ValueObject
       newowner: RoleSpec
     }
@@ -121,9 +156,16 @@ export namespace pg {
       query: Statement
     }
   }
-  export type CreateTriggerStmt = { CreateTriggerStmt: {} }
-
-  export type Expression = {}
+  export type CreateTrigStmt = {
+    CreateTrigStmt: {
+      trigname: string
+      relation: Relation
+      funcname: Array<ValueObject>
+      row: boolean
+      timing: number
+      events: number
+    }
+  }
 
   export type CreatePolicyStmt = {
     policy_name: string
