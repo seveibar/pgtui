@@ -18,12 +18,15 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
+    "execa": "^5.1.1",
     "lodash": "^4.17.21",
     "mkdirp": "^1.0.4",
     "pg-formatter": "^1.2.0",
     "pg-query-parser": "^0.2.5",
+    "pgknexlove": "^1.1.13",
     "pgsql-parser": "^13.1.6",
     "rmfr": "^2.0.0",
+    "tempy": "^2.0.0",
     "yargs": "^17.1.1"
   }
 }
