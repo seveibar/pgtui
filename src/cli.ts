@@ -10,6 +10,18 @@ const argv = yargs(hideBin(process.argv)).command(
     yargs.positional("dir", {
       describe: "Target Directory to dump to (will be deleted/recreated)",
     })
-).argv
+).showHelpOnFail(true).demandCommand().argv
+
+const commandMap = {
+  async "dump-to-dir"(yargs) {},
+}
+
+async function main() {
+  const [cmd] = argv._
+
+  if (!commandMap[cmd)) {
+    
+  }
+}
 
 console.log(argv)
