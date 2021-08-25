@@ -9,7 +9,9 @@ export const loadStructureSQL = async (connectionInfo?: any) => {
 
   const result = await execa(
     "pg_dump",
-    ["-h", host, "-p", port, "-U", user, database].map((a) => a.toString())
+    ["-h", host, "-p", port, "-U", user, "-s", database].map((a) =>
+      a.toString()
+    )
   )
 
   return result.stdout
