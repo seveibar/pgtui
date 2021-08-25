@@ -28,7 +28,11 @@ export const treeToDirectoryStructure = (
   for (const schema of Object.values(db.schemas)) {
     for (const table of Object.values(schema.tables)) {
       d[`${schema.name}/tables/${table.name}/table.sql`] =
-        render(table) + "\n" + render(table.alterations)
+        render(table) +
+        "\n" +
+        render(table.alterations) +
+        "\n" +
+        render(Object.values(table.indexes))
       if (!isEmpty(table.triggers)) {
         d[`${schema.name}/tables/${table.name}/triggers.sql`] = render(
           Object.values(table.triggers)
