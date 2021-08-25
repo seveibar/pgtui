@@ -15,8 +15,6 @@ developers more easily preview your database...
 npm install --save-dev pgtui
 ```
 
-Then in your package.json...
-
 ```javascript
 {
   "name": "my-package",
@@ -24,10 +22,30 @@ Then in your package.json...
   "scripts": {
     // ...
     "db:view": "pgtui",
-    "db:dump": "pgtui --dump ./db/structure",
+    "db:dump": "pgtui --dump-to-dir ./db/structure",
   }
 }
 ```
+
+## CLI Usage
+
+```bash
+pgtui <command>
+
+Commands:
+  pgtui dump-to-dir  Dump database structure into directory
+
+Options:
+  --help      Show help                                                [boolean]
+  --version   Show version number                                      [boolean]
+  --host      Postgres Host
+  --password  Postgres Password
+  --user      Postgres User
+  --port      Postgres Port
+  --database  Postgres Database
+```
+
+## Tips
 
 I'd also recommend adding `npm run db:dump` as a step after your migration, that way anyone reviewing a migration can see the change in the database structure!
 
