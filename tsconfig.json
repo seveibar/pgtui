@@ -8,11 +8,10 @@
     "outDir": "dist",
     "baseUrl": "./",
     "paths": {
-      "~/*": ["src/*"]
+      "~/*": ["lib/*"]
     }
   },
   "include": [
-    "src/**/*",
-    "tests/**/*"
+    "lib/**/*", "tests/**/*", "cli.ts",
   ]
 }
