@@ -51,7 +51,11 @@ async function main() {
 
   if (!commandMap[cmd]) throw new Error(`Command not found "${cmd}"`)
 
-  await commandMap[cmd](yargs)
+  await commandMap[cmd](argv)
 }
 
-console.log(argv)
+if (!module.parent) {
+  main().catch((e) => {
+    console.log(e.stack)
+  })
+}
