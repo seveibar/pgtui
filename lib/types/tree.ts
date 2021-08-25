@@ -48,6 +48,11 @@ export type Sequence = {
   owner: string
 }
 
+export type Index = {
+  name: string
+  query: string
+}
+
 export type Table = {
   name: string
   columns: Array<Column>
@@ -57,6 +62,9 @@ export type Table = {
   }
   triggers: {
     [triggerName: string]: Trigger
+  }
+  indexes: {
+    [indexName: string]: Index
   }
   alterations: Array<TableAlteration>
   sequences: Array<Sequence>

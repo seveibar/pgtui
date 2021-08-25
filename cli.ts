@@ -24,11 +24,11 @@ const argv = yargs(hideBin(process.argv))
       })
   )
   .options({
-    host: { desc: "Postgres Host" },
+    host: { desc: "Postgres Host", alias: "h" },
     password: { desc: "Postgres Password" },
-    user: { desc: "Postgres User" },
-    port: { desc: "Postgres Port" },
-    database: { desc: "Postgres Database" },
+    user: { desc: "Postgres User", alias: "U" },
+    port: { desc: "Postgres Port", alias: "p" },
+    database: { desc: "Postgres Database", alias: "W" },
   })
   .showHelpOnFail(true)
   .demandCommand().argv

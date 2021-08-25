@@ -112,6 +112,7 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         alterations: [],
         policies: {},
         triggers: {},
+        indexes: {},
         sequences: [],
         grants: [],
         owner: "",
@@ -243,6 +244,17 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         query: deparsePg(stmt),
         name: stmt.CreateExtensionStmt.extname,
       })
+      continue
+    }
+
+    if ("IndexStmt" in stmt) {
+      const { idxname, relation } = stmt.IndexStmt
+      db.schemas[relation.schemaname].tables[relation.relname].indexes[
+        idxname
+      ] = {
+        name: idxname,
+        query: deparsePg(stmt),
+      }
       continue
     }
 

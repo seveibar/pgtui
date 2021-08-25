@@ -14,6 +14,7 @@ export namespace pg {
     | CreateSeqStmt
     | CreateExtensionStmt
     | CommentStmt
+    | IndexStmt
 
   export type Expression =
     | ValueObject
@@ -30,6 +31,16 @@ export namespace pg {
     | "OBJECT_TABLE"
     | "OBJECT_FUNCTION"
     | "OBJECT_SEQUENCE"
+
+  export type IndexStmt = {
+    IndexStmt: {
+      idxname: string
+      relation: Relation
+      accessMethod: "btree"
+      indexParams: Array<any>
+      unique: boolean
+    }
+  }
 
   export type CommentStmt = {
     CommentStmt: {
