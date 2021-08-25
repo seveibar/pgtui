@@ -2,8 +2,9 @@ import fs from "fs"
 import path from "path"
 import getTreeFromSQL from "./get-tree-from-sql"
 import treeToDirectory from "./tree-to-directory"
+import loadStructureSQL from "~/load-structure-sql"
 
-export { treeToDirectory, getTreeFromSQL }
+export { treeToDirectory, getTreeFromSQL, loadStructureSQL }
 
 // const content = fs
 //   .readFileSync(path.resolve(__dirname, "..", "tests", "structure.sql"))

@@ -109,6 +109,18 @@
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.1.tgz#d3357479a0fdfdd5907fe67e17e0a85c906e1301"
   integrity sha512-Gj7cI7z+98M282Tqmp2K5EIsoouUEzbBJhQQzDE3jSIRk6r9gsz0oUokqIUR4u1R3dMHo0pDHM7sNOHyhulypw==
 
+"@types/yargs-parser@*":
+  version "20.2.1"
+  resolved "https://registry.yarnpkg.com/@types/yargs-parser/-/yargs-parser-20.2.1.tgz#3b9ce2489919d9e4fea439b76916abc34b2df129"
+  integrity sha512-7tFImggNeNBVMsn0vLrpn1H1uPrUBdnARPTpZoitY37ZrdJREzf7I16tMrlK3hen349gr1NYh8CmZQa7CTG6Aw==
+
+"@types/yargs@^17.0.2":
+  version "17.0.2"
+  resolved "https://registry.yarnpkg.com/@types/yargs/-/yargs-17.0.2.tgz#8fb2e0f4cdc7ab2a1a570106e56533f31225b584"
+  integrity sha512-JhZ+pNdKMfB0rXauaDlrIvm+U7V4m03PPOSVoPS66z8gf+G4Z/UW8UlrVIj2MRQOBzuoEvYtjS0bqYwnpZaS9Q==
+  dependencies:
+    "@types/yargs-parser" "*"
+
 abbrev@1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/abbrev/-/abbrev-1.1.1.tgz#f8f2c887ad10bf67f634f005b6987fed3179aac8"
@@ -2395,10 +2407,10 @@ pg@^8.5.1:
     pg-types "^2.1.0"
     pgpass "1.x"
 
-pgknexlove@^1.1.13:
-  version "1.1.13"
-  resolved "https://registry.yarnpkg.com/pgknexlove/-/pgknexlove-1.1.13.tgz#d086ae67e90fb2a249f1328b943bfa02d9155d5e"
-  integrity sha512-QrOPJLpL95BHfz8aSxjDOmT0G5y6OVxvBmx14kc03fs5RMswzqvXLEwKLIwVa9rvebriR+O68V3wpy6EJxQayA==
+pgknexlove@^1.1.16:
+  version "1.1.16"
+  resolved "https://registry.yarnpkg.com/pgknexlove/-/pgknexlove-1.1.16.tgz#ac41f761460dcb8ff938da28315ecf3b4151f1f6"
+  integrity sha512-amToRMDnHNyUPI7hIxe5viNCql3evy6Yf5x1Mbd+GStoc6Y6j0AOTfUppBA7UaSVTi4Z2JeeGWcIBu7ywzdCow==
   dependencies:
     knex "^0.95.10"
     pg "^8.5.1"

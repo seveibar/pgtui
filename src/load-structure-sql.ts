@@ -1,16 +1,18 @@
 import execa from "execa"
 import pgknexlove from "pgknexlove"
 
-export const loadStructureSQL = async () => {
-  const { host, port, user, password, database } =
-    pgknexlove.default.getConnectionInfo()
+export const loadStructureSQL = async (connectionInfo?: any) => {
+  const { host, port, user, password, database } = {
+    ...pgknexlove.default.getConnectionInfo(),
+    ...connectionInfo,
+  } as any
 
-  const res = await execa(
+  const result = await execa(
     "pg_dump",
     ["-h", host, "-p", port, "-U", user, database].map((a) => a.toString())
   )
 
-  console.log(res)
+  return result.stdout
 }
 
 export default loadStructureSQL
