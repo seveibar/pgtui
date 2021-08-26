@@ -9,9 +9,12 @@
     "baseUrl": "./",
     "paths": {
       "~/*": ["lib/*"]
-    }
+    },
+    "plugins": [
+      {
+        "transform": "@zerollup/ts-transform-paths"
+      }
+    ]
   },
-  "include": [
-    "lib/**/*", "tests/**/*", "cli.ts",
-  ]
+  "include": ["lib/**/*", "tests/**/*", "cli.ts"]
 }
