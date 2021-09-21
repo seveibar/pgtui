@@ -7,7 +7,7 @@
     "pgtui": "dist/cli.js"
   },
   "scripts": {
-    "test": "ava ./tests/**/*.test.js",
+    "test": "ava ./dist/tests/**/*.test.js",
     "build": "ttsc",
     "build:watch": "ttsc --watch"
   },

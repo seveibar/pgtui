@@ -16,6 +16,14 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
+DO $CREATE_ROLE$
+BEGIN
+  CREATE ROLE api_user SUPERUSER LOGIN;
+  EXCEPTION WHEN DUPLICATE_OBJECT THEN
+  RAISE NOTICE 'not creating role my_role -- it already exists';
+END
+$CREATE_ROLE$;
+
 --
 -- Name: api; Type: SCHEMA; Schema: -; Owner: api_user
 --
