@@ -55,7 +55,8 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       if (objectType === "OBJECT_SCHEMA") {
         db.schemas[targetName].owner = newowner.rolename
       } else if (objectType === "OBJECT_FUNCTION") {
-        const [schemaname, funcname] = targetName.split(".")
+        const [schemaname, funcname_raw] = targetName.split(".")
+        const funcname = funcname_raw.split("(")[0].trim()
         db.schemas[schemaname].functions[funcname].owner = newowner.rolename
       } else {
         throw new Error(
