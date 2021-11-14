@@ -1,5 +1,5 @@
 FROM node:14-bullseye
-RUN apt-get update && apt-get install dumb-init python3 python -y
+RUN apt-get update && apt-get install dumb-init python3 python iproute2 postgresql-client -y
 
 WORKDIR /app
 
@@ -8,9 +8,8 @@ RUN yarn install
 COPY . .
 RUN yarn build
 
-
 ENV RUNNING_IN_DOCKER "yes"
 
 ENTRYPOINT ["/usr/bin/dumb-init", "--"]
 
-CMD ["node", "dist"]
+CMD ["node", "/app/dist/cli.js"]

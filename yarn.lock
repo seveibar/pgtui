@@ -1317,6 +1317,14 @@ dir-glob@^3.0.0, dir-glob@^3.0.1:
   dependencies:
     path-type "^4.0.0"
 
+docker-host-ip@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/docker-host-ip/-/docker-host-ip-1.0.1.tgz#2e372f57fbb37bb958efbfd5ce111fbd0be916ed"
+  integrity sha1-LjcvV/uze7lY77/VzhEfvQvpFu0=
+  dependencies:
+    lodash.isarray "^4.0.0"
+    lodash.isstring "^4.0.1"
+
 dot-prop@^5.1.0, dot-prop@^5.2.0:
   version "5.3.0"
   resolved "https://registry.yarnpkg.com/dot-prop/-/dot-prop-5.3.0.tgz#90ccce708cd9cd82cc4dc8c3ddd9abdd55b20e88"
@@ -1671,11 +1679,6 @@ get-caller-file@^2.0.5:
   version "2.0.5"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-2.0.5.tgz#4f94412a82db32f36e3b0b9741f8a97feb031f7e"
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
-
-get-docker-host@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/get-docker-host/-/get-docker-host-1.0.3.tgz#85287f9fa34b37b2c45e8e83e858fca83b95ae77"
-  integrity sha1-hSh/n6NLN7LEXo6D6Fj8qDuVrnc=
 
 get-stream@^4.1.0:
   version "4.1.0"
@@ -2521,10 +2524,20 @@ locate-path@^5.0.0:
   dependencies:
     p-locate "^4.1.0"
 
+lodash.isarray@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/lodash.isarray/-/lodash.isarray-4.0.0.tgz#2aca496b28c4ca6d726715313590c02e6ea34403"
+  integrity sha1-KspJayjEym1yZxUxNZDALm6jRAM=
+
 lodash.ismatch@^4.4.0:
   version "4.4.0"
   resolved "https://registry.yarnpkg.com/lodash.ismatch/-/lodash.ismatch-4.4.0.tgz#756cb5150ca3ba6f11085a78849645f188f85f37"
   integrity sha1-dWy1FQyjum8RCFp4hJZF8Yj4Xzc=
+
+lodash.isstring@^4.0.1:
+  version "4.0.1"
+  resolved "https://registry.yarnpkg.com/lodash.isstring/-/lodash.isstring-4.0.1.tgz#d527dfb5456eca7cc9bb95d5daeaf88ba54a5451"
+  integrity sha1-1SfftUVuynzJu5XV2ur4i6VKVFE=
 
 lodash@4.17.20:
   version "4.17.20"

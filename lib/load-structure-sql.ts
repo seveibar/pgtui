@@ -1,6 +1,6 @@
 import execa from "execa"
 import pgknexlove from "pgknexlove"
-import getDockerHost from "get-docker-host"
+import getDockerHost from "docker-host-ip"
 
 export const loadStructureSQL = async (connectionInfo?: any) => {
   let { host, port, user, password, database } = {
