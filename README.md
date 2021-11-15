@@ -58,7 +58,7 @@ by default.
 To dump database structure you need to mount a volume on the host machine.
 
 ```bash
-docker run -it -v $(pwd)/dump:/dump seveibar/pgtui dump-to-dir /dump
+docker run -it -u "$(id -u):$(id -g)" -v $(pwd)/dump:/dump seveibar/pgtui dump-to-dir /dump
 ```
 
 ## Tips
