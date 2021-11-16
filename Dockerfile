@@ -2,6 +2,8 @@ FROM node:14-bullseye
 RUN apt-get update && apt-get install dumb-init python3 python iproute2 postgresql-client -y
 RUN useradd -ms /bin/bash pgtui
 
+RUN mkdir /app && chown -R pgtui:pgtui /app
+
 USER pgtui
 WORKDIR /app
 
