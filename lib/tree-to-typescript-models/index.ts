@@ -9,6 +9,8 @@
 
 import { DatabaseTree } from "lib/types"
 import { Project, StructureKind } from "ts-morph"
+import snakeToPascal from "~/snake-to-pascal"
+import sqlToTsType from "~/sql-to-ts-type"
 
 export const treeToTypescriptModels = (
   db: DatabaseTree
@@ -25,15 +27,33 @@ export const treeToTypescriptModels = (
   for (const schemaName of Object.keys(db.schemas)) {
     indexFile.addExportDeclaration({
       moduleSpecifier: `./${schemaName}`,
+      namespaceExport: `${schemaName}`,
     })
   }
-
-  console.log(indexFile.getText())
 
   const knexFile = project.createSourceFile("db/types/knex.ts", "")
 
   for (const [schemaName, schema] of Object.entries(db.schemas)) {
-    console.log({ schema })
+    const schemaFile = project.createSourceFile(`db/types/${schemaName}`, "")
+
+    for (const [tableName, tableData] of Object.entries(schema.tables)) {
+      const tableFile = project.createSourceFile(
+        `db/types/${schemaName}/${tableName}.ts`,
+        ""
+      )
+      const interfaceDeclaration = tableFile.addInterface({
+        name: `${snakeToPascal(tableName)}`,
+      })
+      interfaceDeclaration.setIsExported(true)
+      // interfaceDeclaration.setIsDefaultExport(true)
+
+      for (const column of tableData.columns) {
+        interfaceDeclaration.addProperty({
+          name: column.name,
+          type: sqlToTsType(column.type, !column.query.includes("NOT NULL")),
+        })
+      }
+    }
   }
 
   return {
