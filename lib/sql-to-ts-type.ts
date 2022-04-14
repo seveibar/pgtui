@@ -26,11 +26,11 @@ export const sqlToTsType = (type: string, canBeNull: boolean): string => {
       break
 
     default:
-      tsType = "unknown"
+      tsType = "any"
       break
   }
 
-  if (tsType === "unknown") {
+  if (tsType === "any") {
     return tsType
   }
 
