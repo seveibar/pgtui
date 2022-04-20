@@ -9,6 +9,7 @@ export const sqlToTsType = (type: string, canBeNull: boolean): string => {
       break
 
     case "int4":
+    case "int":
       tsType = "number"
       break
 
@@ -22,6 +23,7 @@ export const sqlToTsType = (type: string, canBeNull: boolean): string => {
       break
 
     case "bool":
+    case "boolean":
       tsType = "boolean"
       break
 
