@@ -27,34 +27,84 @@ export const treeToTypescriptModels = (
   for (const schemaName of Object.keys(db.schemas)) {
     indexFile.addExportDeclaration({
       moduleSpecifier: `./${schemaName}`,
-      namespaceExport: `${schemaName}`,
+      namespaceExport: schemaName,
     })
   }
 
   const knexFile = project.createSourceFile("db/types/knex.ts", "")
 
   for (const [schemaName, schema] of Object.entries(db.schemas)) {
-    const schemaFile = project.createSourceFile(`db/types/${schemaName}`, "")
+    project.createSourceFile(`db/types/${schemaName}`, "")
+    const schemaIndexFile = project.createSourceFile(
+      `db/types/${schemaName}/index.ts`,
+      ""
+    )
+
+    const modelTypeMapName = "ModelTypeMap"
+    const modelTypeMapDeclaration = schemaIndexFile.addInterface({
+      name: modelTypeMapName,
+    })
+
+    const knexFileExportDeclaration = knexFile.addExportDeclaration({
+      moduleSpecifier: `./${schemaName}`,
+    })
+    knexFileExportDeclaration.addNamedExport({
+      name: modelTypeMapName,
+      alias: snakeToPascal(schemaName) + modelTypeMapName,
+    })
 
     for (const [tableName, tableData] of Object.entries(schema.tables)) {
+      const pascaledTableName = snakeToPascal(tableName)
       const tableFile = project.createSourceFile(
-        `db/types/${schemaName}/${tableName}.ts`,
+        `db/types/${schemaName}/${pascaledTableName}.ts`,
         ""
       )
-      const interfaceDeclaration = tableFile.addInterface({
-        name: `${snakeToPascal(tableName)}`,
+
+      const tableInterfaceDeclaration = tableFile.addInterface({
+        name: pascaledTableName,
+        isDefaultExport: true,
       })
-      interfaceDeclaration.setIsExported(true)
-      // interfaceDeclaration.setIsDefaultExport(true)
+
+      const tableInterfaceInitializerDeclaration = tableFile.addInterface({
+        name: `${pascaledTableName}Initializer`,
+        isExported: true,
+      })
 
       for (const column of tableData.columns) {
-        interfaceDeclaration.addProperty({
+        const properyCanBeNull = !column.query.includes("NOT NULL")
+        const properyHasDefaultValue = column.query.includes("DEFAULT")
+        const isPropertyOptional = properyHasDefaultValue || properyCanBeNull
+
+        tableInterfaceDeclaration.addProperty({
           name: column.name,
-          type: sqlToTsType(column.type, !column.query.includes("NOT NULL")),
+          type: sqlToTsType(column.type, properyCanBeNull),
+        })
+
+        tableInterfaceInitializerDeclaration.addProperty({
+          name: column.name,
+          type: sqlToTsType(column.type, properyCanBeNull),
+          hasQuestionToken: isPropertyOptional,
         })
       }
+
+      const interfaceImportDeclaration = schemaIndexFile.addImportDeclaration({
+        moduleSpecifier: `./${pascaledTableName}`,
+      })
+      interfaceImportDeclaration.addNamedImport({
+        name: pascaledTableName,
+      })
+      modelTypeMapDeclaration.addProperty({
+        name: tableName,
+        type: pascaledTableName,
+      })
+      // tableFile.saveSync()
     }
+    // schemaFile.saveSync()
+    // schemaIndexFile.saveSync()
   }
+
+  // indexFile.saveSync()
+  // knexFile.saveSync()
 
   return {
     "db/types/index.ts": "// typescript stuff",
