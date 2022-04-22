@@ -8,7 +8,7 @@
  **/
 
 import { DatabaseTree } from "lib/types"
-import { Project, StructureKind } from "ts-morph"
+import { Project, ModuleDeclarationKind } from "ts-morph"
 import snakeToPascal from "~/snake-to-pascal"
 import sqlToTsType from "~/sql-to-ts-type"
 
@@ -45,12 +45,18 @@ export const treeToTypescriptModels = (
       name: modelTypeMapName,
     })
 
-    const knexFileExportDeclaration = knexFile.addExportDeclaration({
-      moduleSpecifier: `./${schemaName}`,
+    const knexFileImportAlias = snakeToPascal(schemaName) + modelTypeMapName
+    const knexFileExportDeclaration = knexFile.insertExportDeclaration(0, {
+      moduleSpecifier: `./${schemaName}`, // `db/types/${schemaName}`
     })
     knexFileExportDeclaration.addNamedExport({
       name: modelTypeMapName,
-      alias: snakeToPascal(schemaName) + modelTypeMapName,
+      alias: knexFileImportAlias,
+    })
+
+    knexFile.addTypeAlias({
+      name: `Prefixed${knexFileImportAlias}`,
+      type: `{\n[K in keyof ${knexFileImportAlias} as \`${schemaName}.\${K}\`]: ${knexFileImportAlias}[K]\n}`,
     })
 
     for (const [tableName, tableData] of Object.entries(schema.tables)) {
@@ -71,18 +77,19 @@ export const treeToTypescriptModels = (
       })
 
       for (const column of tableData.columns) {
-        const properyCanBeNull = !column.query.includes("NOT NULL")
-        const properyHasDefaultValue = column.query.includes("DEFAULT")
-        const isPropertyOptional = properyHasDefaultValue || properyCanBeNull
+        const propertyCanBeNull = !column.query.includes("NOT NULL")
+        const propertyHasDefaultValue = column.query.includes("DEFAULT")
+        const isPropertyOptional = propertyHasDefaultValue || propertyCanBeNull
+        const tsType = sqlToTsType(column.type, propertyCanBeNull)
 
         tableInterfaceDeclaration.addProperty({
           name: column.name,
-          type: sqlToTsType(column.type, properyCanBeNull),
+          type: tsType,
         })
 
         tableInterfaceInitializerDeclaration.addProperty({
           name: column.name,
-          type: sqlToTsType(column.type, properyCanBeNull),
+          type: tsType,
           hasQuestionToken: isPropertyOptional,
         })
       }
@@ -105,6 +112,19 @@ export const treeToTypescriptModels = (
 
   // indexFile.saveSync()
   // knexFile.saveSync()
+
+  const moduleDeclaration = knexFile.addModule({
+    name: "knex/types/tables",
+    hasDeclareKeyword: true,
+    declarationKind: ModuleDeclarationKind.Module,
+  })
+
+  // moduleDeclaration.addInterface({
+  //   name: "Tables",
+  //   extends: ["ModelTypeMap"],
+  // })
+
+  console.log("🚀 ~ file: index.ts ~ line 111 ~ knexFile\n", knexFile.getText())
 
   return {
     "db/types/index.ts": "// typescript stuff",
