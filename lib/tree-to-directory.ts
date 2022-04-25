@@ -5,6 +5,7 @@ import fs from "fs/promises"
 import path from "path"
 import isEmpty from "lodash/isEmpty"
 import { format as formatSQL } from "pg-formatter"
+import { dirStructureToFs } from "./dir-structure-to-fs"
 
 const section = (title, content) => {
   if (!content) return ""
@@ -78,14 +79,7 @@ export const treeToDirectory = async (
   await rmfr(outputDir).catch((e) => {})
   await mkdirp(outputDir)
   const dirStructure = treeToDirectoryStructure(db)
-  for (const filePath in dirStructure) {
-    const fullFilePath = path.resolve(outputDir, filePath)
-    await mkdirp(path.dirname(fullFilePath))
-    await fs.writeFile(
-      fullFilePath,
-      (header ? `-- ${header}\n\n` : "") + dirStructure[filePath]
-    )
-  }
+  await dirStructureToFs({ outputDir, dirStructure, header })
 }
 
 export default treeToDirectory

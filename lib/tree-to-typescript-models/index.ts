@@ -11,12 +11,14 @@ import { DatabaseTree } from "lib/types"
 import { Project, ModuleDeclarationKind } from "ts-morph"
 import snakeToPascal from "~/snake-to-pascal"
 import sqlToTsType from "~/sql-to-ts-type"
+import prettier from "prettier"
 
 export const treeToTypescriptModels = (
   db: DatabaseTree
 ): { [filePath: string]: string } => {
-  const fileTree = {}
-  const project = new Project({})
+  const project = new Project({
+    useInMemoryFileSystem: true,
+  })
 
   project.addSourceFilesAtPaths("db/types/**/*ts")
   const indexFile = project.createSourceFile("db/types/index.ts", "")
@@ -125,6 +127,7 @@ export const treeToTypescriptModels = (
         name: tableName,
         type: pascaledTableName,
       })
+
       initializermodelTypeMapDeclaration.addProperty({
         name: tableName,
         type: initializerName,
@@ -139,6 +142,9 @@ export const treeToTypescriptModels = (
     schemaIndexFile.saveSync()
   }
 
+  indexFile.saveSync()
+  knexFile.saveSync()
+
   const moduleDeclaration = knexFile.addModule({
     name: '"knex/types/tables"',
     hasDeclareKeyword: true,
@@ -151,13 +157,21 @@ export const treeToTypescriptModels = (
   }))
   moduleDeclaration.addInterfaces(addInterfaceTemplates)
 
-  indexFile.saveSync()
-  knexFile.saveSync()
+  const filePaths = project.getFileSystem().globSync(["**/*.ts"])
 
-  return {
-    "db/types/index.ts": "// typescript stuff",
-    "db/types/seam/Device.ts": "// typescript stuff",
+  const fsObj = {}
+
+  for (const filePath of filePaths) {
+    fsObj[`.${filePath}`] = prettier.format(
+      project.getFileSystem().readFileSync(filePath),
+      {
+        semi: false,
+        parser: "typescript",
+      }
+    )
   }
+
+  return fsObj
 }
 
 export default treeToTypescriptModels

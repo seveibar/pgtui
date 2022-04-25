@@ -7,7 +7,7 @@
     "pgtui": "dist/cli.js"
   },
   "scripts": {
-    "test": "ava ./dist/tests/**/*.test.js",
+    "test": "ava",
     "build": "ttsc",
     "build:watch": "ttsc --watch"
   },
@@ -36,6 +36,7 @@
     "pg-query-parser": "^0.2.5",
     "pgknexlove": "^1.1.16",
     "pgsql-parser": "^13.1.6",
+    "prettier": "^2.6.2",
     "rmfr": "^2.0.0",
     "tempy": "^2.0.0",
     "yargs": "^17.1.1"
