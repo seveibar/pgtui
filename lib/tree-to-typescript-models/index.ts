@@ -24,7 +24,9 @@ export const treeToTypescriptModels = (
     moduleSpecifier: "./knex",
   })
 
-  for (const schemaName of Object.keys(db.schemas)) {
+  for (const [schemaName, schema] of Object.entries(db.schemas)) {
+    if (Object.keys(schema.tables).length === 0) continue
+
     indexFile.addExportDeclaration({
       moduleSpecifier: `./${schemaName}`,
       namespaceExport: schemaName,
@@ -32,8 +34,13 @@ export const treeToTypescriptModels = (
   }
 
   const knexFile = project.createSourceFile("db/types/knex.ts", "")
+  const prefixedKnexFileImportAliases = []
 
-  for (const [schemaName, schema] of Object.entries(db.schemas)) {
+  for (const schema of Object.values(db.schemas)) {
+    const schemaName = schema.name
+
+    if (Object.keys(schema.tables).length === 0) continue
+
     project.createSourceFile(`db/types/${schemaName}`, "")
     const schemaIndexFile = project.createSourceFile(
       `db/types/${schemaName}/index.ts`,
@@ -41,26 +48,39 @@ export const treeToTypescriptModels = (
     )
 
     const modelTypeMapName = "ModelTypeMap"
+    const InitializerTypeMapName = "InitializerTypeMap"
     const modelTypeMapDeclaration = schemaIndexFile.addInterface({
       name: modelTypeMapName,
     })
+    const initializermodelTypeMapDeclaration = schemaIndexFile.addInterface({
+      name: InitializerTypeMapName,
+    })
+    const schemaIndexFileExportDeclaration =
+      schemaIndexFile.addExportDeclaration({
+        isTypeOnly: true,
+        namedExports: [modelTypeMapName, InitializerTypeMapName],
+      })
 
     const knexFileImportAlias = snakeToPascal(schemaName) + modelTypeMapName
-    const knexFileExportDeclaration = knexFile.insertExportDeclaration(0, {
-      moduleSpecifier: `./${schemaName}`, // `db/types/${schemaName}`
+    const prefixedKnexFileImportAlias = `Prefixed${knexFileImportAlias}`
+    prefixedKnexFileImportAliases.push(prefixedKnexFileImportAlias)
+
+    const knexFileExportDeclaration = knexFile.insertImportDeclaration(0, {
+      moduleSpecifier: `./${schemaName}`,
     })
-    knexFileExportDeclaration.addNamedExport({
+    knexFileExportDeclaration.addNamedImport({
       name: modelTypeMapName,
       alias: knexFileImportAlias,
     })
 
     knexFile.addTypeAlias({
-      name: `Prefixed${knexFileImportAlias}`,
+      name: prefixedKnexFileImportAlias,
       type: `{\n[K in keyof ${knexFileImportAlias} as \`${schemaName}.\${K}\`]: ${knexFileImportAlias}[K]\n}`,
     })
 
     for (const [tableName, tableData] of Object.entries(schema.tables)) {
       const pascaledTableName = snakeToPascal(tableName)
+      const initializerName = `${pascaledTableName}Initializer`
       const tableFile = project.createSourceFile(
         `db/types/${schemaName}/${pascaledTableName}.ts`,
         ""
@@ -72,7 +92,7 @@ export const treeToTypescriptModels = (
       })
 
       const tableInterfaceInitializerDeclaration = tableFile.addInterface({
-        name: `${pascaledTableName}Initializer`,
+        name: initializerName,
         isExported: true,
       })
 
@@ -96,35 +116,43 @@ export const treeToTypescriptModels = (
 
       const interfaceImportDeclaration = schemaIndexFile.addImportDeclaration({
         moduleSpecifier: `./${pascaledTableName}`,
+        defaultImport: pascaledTableName,
       })
       interfaceImportDeclaration.addNamedImport({
-        name: pascaledTableName,
+        name: initializerName,
       })
       modelTypeMapDeclaration.addProperty({
         name: tableName,
         type: pascaledTableName,
       })
-      // tableFile.saveSync()
+      initializermodelTypeMapDeclaration.addProperty({
+        name: tableName,
+        type: initializerName,
+      })
+      schemaIndexFileExportDeclaration.addNamedExports([
+        pascaledTableName,
+        initializerName,
+      ])
+
+      tableFile.saveSync()
     }
-    // schemaFile.saveSync()
-    // schemaIndexFile.saveSync()
+    schemaIndexFile.saveSync()
   }
 
-  // indexFile.saveSync()
-  // knexFile.saveSync()
-
   const moduleDeclaration = knexFile.addModule({
-    name: "knex/types/tables",
+    name: '"knex/types/tables"',
     hasDeclareKeyword: true,
     declarationKind: ModuleDeclarationKind.Module,
   })
 
-  // moduleDeclaration.addInterface({
-  //   name: "Tables",
-  //   extends: ["ModelTypeMap"],
-  // })
+  const addInterfaceTemplates = prefixedKnexFileImportAliases.map((alias) => ({
+    name: "Tables",
+    extends: alias,
+  }))
+  moduleDeclaration.addInterfaces(addInterfaceTemplates)
 
-  console.log("🚀 ~ file: index.ts ~ line 111 ~ knexFile\n", knexFile.getText())
+  indexFile.saveSync()
+  knexFile.saveSync()
 
   return {
     "db/types/index.ts": "// typescript stuff",
