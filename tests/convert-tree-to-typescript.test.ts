@@ -15,6 +15,6 @@ test("check that structure is identical if sql created from tree is dumped from 
 
   const dbTree = getTreeFromSQL(sql1)
   const typescriptFS = await treeToTypescriptModels(dbTree)
-  // console.log(typescriptFS)
+  console.log(typescriptFS)
   t.truthy(typescriptFS)
 })

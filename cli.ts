@@ -6,6 +6,8 @@ import path from "path"
 import fs from "fs/promises"
 import execa from "execa"
 import { getTreeFromSQL, treeToDirectory, loadStructureSQL } from "./lib"
+import treeToTypescriptModels from "~/tree-to-typescript-models"
+import { dirStructureToFs } from "~/dir-structure-to-fs"
 
 const argv = yargs(hideBin(process.argv))
   .command("dump-to-dir", "Dump database structure into directory", (yargs) =>
@@ -70,7 +72,8 @@ const commandMap = {
     } else {
       content = await loadStructureSQL(argv)
     }
-    await treeToTypescriptModels(getTreeFromSQL(content), targetDir, argv)
+    const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content))
+    await dirStructureToFs({ dirStructure, outputDir: targetDir })
   },
 }
 
