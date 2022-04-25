@@ -1,4 +1,4 @@
-import { mkdirp } from "mkdirp"
+import mkdirp from "mkdirp"
 import fs from "fs/promises"
 import path from "path"
 
