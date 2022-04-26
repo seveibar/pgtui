@@ -14,7 +14,8 @@ import sqlToTsType from "~/sql-to-ts-type"
 import prettier from "prettier"
 
 export const treeToTypescriptModels = (
-  db: DatabaseTree
+  db: DatabaseTree,
+  primarySchemaName?: string
 ): { [filePath: string]: string } => {
   const project = new Project({
     useInMemoryFileSystem: true,
@@ -29,10 +30,30 @@ export const treeToTypescriptModels = (
   for (const [schemaName, schema] of Object.entries(db.schemas)) {
     if (Object.keys(schema.tables).length === 0) continue
 
-    indexFile.addExportDeclaration({
-      moduleSpecifier: `./${schemaName}`,
-      namespaceExport: schemaName,
-    })
+    const isPrimarySchemaNameValid = Object.keys(db.schemas).includes(
+      primarySchemaName
+    )
+
+    if (!isPrimarySchemaNameValid && schemaName === "public") {
+      indexFile.addExportDeclaration({
+        moduleSpecifier: "./public",
+      })
+    } else if (isPrimarySchemaNameValid && schemaName === primarySchemaName) {
+      indexFile.addExportDeclaration({
+        moduleSpecifier: `./${primarySchemaName}`,
+      })
+      indexFile.addExportDeclaration({
+        moduleSpecifier: "./public",
+        namespaceExport: "public_",
+      })
+    }
+
+    if (schemaName !== "public" && schemaName !== primarySchemaName) {
+      indexFile.addExportDeclaration({
+        moduleSpecifier: `./${schemaName}`,
+        namespaceExport: schemaName,
+      })
+    }
   }
 
   const knexFile = project.createSourceFile("db/types/knex.ts", "")
