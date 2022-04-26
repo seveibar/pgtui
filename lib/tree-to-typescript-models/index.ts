@@ -26,11 +26,12 @@ export const treeToTypescriptModels = (
   indexFile.addImportDeclaration({
     moduleSpecifier: "./knex",
   })
+  let isPrimarySchemaNameValid = false
 
   for (const [schemaName, schema] of Object.entries(db.schemas)) {
     if (Object.keys(schema.tables).length === 0) continue
 
-    const isPrimarySchemaNameValid = Object.keys(db.schemas).includes(
+    isPrimarySchemaNameValid = Object.keys(db.schemas).includes(
       primarySchemaName
     )
 
@@ -176,6 +177,12 @@ export const treeToTypescriptModels = (
     declarationKind: ModuleDeclarationKind.Module,
   })
 
+  moduleDeclaration.addInterface({
+    name: "Tables",
+    extends: isPrimarySchemaNameValid
+      ? [snakeToPascal(primarySchemaName) + "ModelTypeMap"]
+      : ["PublicModelTypeMap"],
+  })
   const addInterfaceTemplates = prefixedKnexFileImportAliases.map((alias) => ({
     name: "Tables",
     extends: alias,
