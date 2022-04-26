@@ -42,7 +42,7 @@ export const treeToTypescriptModels = (
       indexFile.addExportDeclaration({
         moduleSpecifier: `./${primarySchemaName}`,
       })
-      indexFile.addExportDeclaration({g
+      indexFile.addExportDeclaration({
         moduleSpecifier: "./public",
         namespaceExport: "public_",
       })
