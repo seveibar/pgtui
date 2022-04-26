@@ -38,11 +38,11 @@ export const treeToTypescriptModels = (
       indexFile.addExportDeclaration({
         moduleSpecifier: "./public",
       })
-    } else if (isPrimarySchemaNameValid && schemaName === primarySchemaName) {
+    } else if (schemaName === primarySchemaName) {
       indexFile.addExportDeclaration({
         moduleSpecifier: `./${primarySchemaName}`,
       })
-      indexFile.addExportDeclaration({
+      indexFile.addExportDeclaration({g
         moduleSpecifier: "./public",
         namespaceExport: "public_",
       })
