@@ -14,7 +14,8 @@ import sqlToTsType from "~/sql-to-ts-type"
 import prettier from "prettier"
 
 export const treeToTypescriptModels = (
-  db: DatabaseTree
+  db: DatabaseTree,
+  primarySchemaName?: string
 ): { [filePath: string]: string } => {
   const project = new Project({
     useInMemoryFileSystem: true,
@@ -25,14 +26,39 @@ export const treeToTypescriptModels = (
   indexFile.addImportDeclaration({
     moduleSpecifier: "./knex",
   })
+  let isPrimarySchemaNameValid = false
 
   for (const [schemaName, schema] of Object.entries(db.schemas)) {
     if (Object.keys(schema.tables).length === 0) continue
 
-    indexFile.addExportDeclaration({
-      moduleSpecifier: `./${schemaName}`,
-      namespaceExport: schemaName,
-    })
+    isPrimarySchemaNameValid = Object.keys(db.schemas).includes(
+      primarySchemaName
+    )
+
+    if (!isPrimarySchemaNameValid && schemaName === "public") {
+      indexFile.addExportDeclaration({
+        moduleSpecifier: "./public",
+      })
+
+      continue
+    } else if (schemaName === primarySchemaName) {
+      indexFile.addExportDeclaration({
+        moduleSpecifier: `./${primarySchemaName}`,
+      })
+      indexFile.addExportDeclaration({
+        moduleSpecifier: "./public",
+        namespaceExport: "public_",
+      })
+
+      continue
+    }
+
+    if (schemaName !== "public") {
+      indexFile.addExportDeclaration({
+        moduleSpecifier: `./${schemaName}`,
+        namespaceExport: schemaName,
+      })
+    }
   }
 
   const knexFile = project.createSourceFile("db/types/knex.ts", "")
@@ -151,6 +177,12 @@ export const treeToTypescriptModels = (
     declarationKind: ModuleDeclarationKind.Module,
   })
 
+  moduleDeclaration.addInterface({
+    name: "Tables",
+    extends: isPrimarySchemaNameValid
+      ? [snakeToPascal(primarySchemaName) + "ModelTypeMap"]
+      : ["PublicModelTypeMap"],
+  })
   const addInterfaceTemplates = prefixedKnexFileImportAliases.map((alias) => ({
     name: "Tables",
     extends: alias,
