@@ -2,12 +2,10 @@
 
 import yargs from "yargs/yargs"
 import { hideBin } from "yargs/helpers"
-import path from "path"
 import fs from "fs/promises"
-import execa from "execa"
-import { getTreeFromSQL, treeToDirectory, loadStructureSQL } from "./lib"
-import treeToTypescriptModels from "~/tree-to-typescript-models"
-import { dirStructureToFs } from "~/dir-structure-to-fs"
+import { getTreeFromSQL, treeToDirectory, loadStructureSQL } from "."
+import treeToTypescriptModels from "tree-to-typescript-models"
+import { dirStructureToFs } from "dir-structure-to-fs"
 
 const argv = yargs(hideBin(process.argv))
   .command("dump-to-dir", "Dump database structure into directory", (yargs) =>
@@ -53,40 +51,38 @@ const argv = yargs(hideBin(process.argv))
   .showHelpOnFail(true)
   .demandCommand().argv
 
-const commandMap = {
-  async "dump-to-dir"(argv) {
-    const [, targetDir] = argv._
-    let content
-    if (argv.sqlFile) {
-      content = (await fs.readFile(argv.sqlFile)).toString()
-    } else {
-      content = await loadStructureSQL(argv)
-    }
-    await treeToDirectory(getTreeFromSQL(content), targetDir, argv)
-  },
-  async "dump-typescript-models"(argv) {
-    const [, targetDir] = argv._
-    let content
-    if (argv.sqlFile) {
-      content = (await fs.readFile(argv.sqlFile)).toString()
-    } else {
-      content = await loadStructureSQL(argv)
-    }
-    const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content))
-    await dirStructureToFs({ dirStructure, outputDir: targetDir })
-  },
-}
+// const commandMap = {
+//   async "dump-to-dir"(argv) {
+//     const [, targetDir] = argv._
+//     let content
+//     if (argv.sqlFile) {
+//       content = (await fs.readFile(argv.sqlFile)).toString()
+//     } else {
+//       content = await loadStructureSQL(argv)
+//     }
+//     await treeToDirectory(getTreeFromSQL(content), targetDir, argv)
+//   },
+//   async "dump-typescript-models"(argv) {
+//     const [, targetDir] = argv._
+//     let content
+//     if (argv.sqlFile) {
+//       content = (await fs.readFile(argv.sqlFile)).toString()
+//     } else {
+//       content = await loadStructureSQL(argv)
+//     }
+//     const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content))
+//     await dirStructureToFs({ dirStructure, outputDir: targetDir })
+//   },
+// }
 
-async function main() {
-  const [cmd] = (await argv)._
+// async function main() {
+//   const [cmd] = (await argv)._
 
-  if (!commandMap[cmd]) throw new Error(`Command not found "${cmd}"`)
+//   if (!commandMap[cmd]) throw new Error(`Command not found "${cmd}"`)
 
-  await commandMap[cmd](argv)
-}
+//   await commandMap[cmd](argv)
+// }
 
-if (!module.parent) {
-  main().catch((e) => {
-    console.log(e.stack)
-  })
-}
+// main().catch((e) => {
+//   console.log(e.stack)
+// })

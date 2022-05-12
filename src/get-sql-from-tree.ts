@@ -1,4 +1,4 @@
-import { DatabaseTree, Schema } from "~/types"
+import { DatabaseTree, Schema } from "types"
 
 const render = (
   objs:

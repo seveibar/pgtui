@@ -8,7 +8,7 @@
   },
   "scripts": {
     "test": "ava",
-    "build": "tsup --dts cli.ts lib"
+    "build": "tsup src --dts"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^8.0.1",

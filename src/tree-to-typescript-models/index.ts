@@ -7,10 +7,10 @@
  *
  **/
 
-import { DatabaseTree } from "lib/types"
+import { DatabaseTree } from "types"
 import { Project, ModuleDeclarationKind } from "ts-morph"
-import snakeToPascal from "~/snake-to-pascal"
-import sqlToTsType from "~/sql-to-ts-type"
+import snakeToPascal from "snake-to-pascal"
+import sqlToTsType from "sql-to-ts-type"
 import prettier from "prettier"
 
 export const treeToTypescriptModels = (

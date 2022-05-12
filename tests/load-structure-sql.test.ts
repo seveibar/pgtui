@@ -1,6 +1,6 @@
 import test from "ava"
 import pgknexlove from "pgknexlove"
-import loadStructureSQL from "~/load-structure-sql"
+import loadStructureSQL from "load-structure-sql"
 
 test("loadStructureSQL", async (t) => {
   const db = await pgknexlove.default({ testMode: true })

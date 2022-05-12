@@ -1,4 +1,4 @@
-import { DatabaseTree } from "~/types"
+import { DatabaseTree } from "types"
 import mkdirp from "mkdirp"
 import rmfr from "rmfr"
 import fs from "fs/promises"
