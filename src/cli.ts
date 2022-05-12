@@ -51,38 +51,38 @@ const argv = yargs(hideBin(process.argv))
   .showHelpOnFail(true)
   .demandCommand().argv
 
-// const commandMap = {
-//   async "dump-to-dir"(argv) {
-//     const [, targetDir] = argv._
-//     let content
-//     if (argv.sqlFile) {
-//       content = (await fs.readFile(argv.sqlFile)).toString()
-//     } else {
-//       content = await loadStructureSQL(argv)
-//     }
-//     await treeToDirectory(getTreeFromSQL(content), targetDir, argv)
-//   },
-//   async "dump-typescript-models"(argv) {
-//     const [, targetDir] = argv._
-//     let content
-//     if (argv.sqlFile) {
-//       content = (await fs.readFile(argv.sqlFile)).toString()
-//     } else {
-//       content = await loadStructureSQL(argv)
-//     }
-//     const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content))
-//     await dirStructureToFs({ dirStructure, outputDir: targetDir })
-//   },
-// }
+const commandMap = {
+  "dump-to-dir": async (argv) => {
+    const [, targetDir] = argv._
+    let content
+    if (argv.sqlFile) {
+      content = (await fs.readFile(argv.sqlFile)).toString()
+    } else {
+      content = await loadStructureSQL(argv)
+    }
+    await treeToDirectory(getTreeFromSQL(content), targetDir, argv)
+  },
+  "dump-typescript-models": async (argv) => {
+    const [, targetDir] = argv._
+    let content
+    if (argv.sqlFile) {
+      content = (await fs.readFile(argv.sqlFile)).toString()
+    } else {
+      content = await loadStructureSQL(argv)
+    }
+    const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content))
+    await dirStructureToFs({ dirStructure, outputDir: targetDir })
+  },
+}
 
-// async function main() {
-//   const [cmd] = (await argv)._
+async function main() {
+  const [cmd] = (await argv)._
 
-//   if (!commandMap[cmd]) throw new Error(`Command not found "${cmd}"`)
+  if (!commandMap[cmd]) throw new Error(`Command not found "${cmd}"`)
 
-//   await commandMap[cmd](argv)
-// }
+  await commandMap[cmd](argv)
+}
 
-// main().catch((e) => {
-//   console.log(e.stack)
-// })
+main().catch((e) => {
+  console.log(e.stack)
+})
