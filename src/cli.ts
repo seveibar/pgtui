@@ -39,6 +39,9 @@ const argv = yargs(hideBin(process.argv))
           sqlFile: {
             desc: "Load SQL File as Schema",
           },
+          defaultSchema: {
+            desc: "Set default schema",
+          },
         })
   )
   .options({
@@ -70,7 +73,10 @@ const commandMap = {
     } else {
       content = await loadStructureSQL(argv)
     }
-    const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content))
+    const dirStructure = await treeToTypescriptModels(
+      getTreeFromSQL(content),
+      argv.defaultSchema
+    )
     await dirStructureToFs({ dirStructure, outputDir: targetDir })
   },
 }
