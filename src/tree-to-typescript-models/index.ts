@@ -21,8 +21,8 @@ export const treeToTypescriptModels = (
     useInMemoryFileSystem: true,
   })
 
-  project.addSourceFilesAtPaths("db/types/**/*ts")
-  const indexFile = project.createSourceFile("db/types/index.ts", "")
+  project.addSourceFilesAtPaths("**/*ts")
+  const indexFile = project.createSourceFile("index.ts", "")
   indexFile.addImportDeclaration({
     moduleSpecifier: "./knex",
   })
@@ -61,7 +61,7 @@ export const treeToTypescriptModels = (
     }
   }
 
-  const knexFile = project.createSourceFile("db/types/knex.ts", "")
+  const knexFile = project.createSourceFile("knex.ts", "")
   const prefixedKnexFileImportAliases = []
 
   for (const schema of Object.values(db.schemas)) {
@@ -69,9 +69,9 @@ export const treeToTypescriptModels = (
 
     if (Object.keys(schema.tables).length === 0) continue
 
-    project.createSourceFile(`db/types/${schemaName}`, "")
+    project.createSourceFile(`${schemaName}`, "")
     const schemaIndexFile = project.createSourceFile(
-      `db/types/${schemaName}/index.ts`,
+      `${schemaName}/index.ts`,
       ""
     )
 
@@ -110,7 +110,7 @@ export const treeToTypescriptModels = (
       const pascaledTableName = snakeToPascal(tableName)
       const initializerName = `${pascaledTableName}Initializer`
       const tableFile = project.createSourceFile(
-        `db/types/${schemaName}/${pascaledTableName}.ts`,
+        `${schemaName}/${pascaledTableName}.ts`,
         ""
       )
 
