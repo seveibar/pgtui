@@ -33,7 +33,7 @@ npm install --save-dev pgtui
 pgtui <command>
 
 Commands:
-  pgtui dump-to-dir  Dump database structure into directory
+  pgtui dump-to-dir             Dump database structure into directory
   pgtui dump-typescript-models  Dump typescript models for db into directory
 
 Options:
