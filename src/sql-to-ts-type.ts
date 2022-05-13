@@ -1,7 +1,9 @@
 export const sqlToTsType = (type: string, canBeNull: boolean): string => {
   let tsType = null
+  const typeWithoutArray = type.replace(/\[\]$/, "")
+  const isTypeArray = type.endsWith("[]")
 
-  switch (type) {
+  switch (typeWithoutArray) {
     case "text":
     case "uuid":
     case "varchar":
@@ -30,6 +32,10 @@ export const sqlToTsType = (type: string, canBeNull: boolean): string => {
     default:
       tsType = "any"
       break
+  }
+
+  if (isTypeArray) {
+    tsType += "[]"
   }
 
   if (tsType === "any") {

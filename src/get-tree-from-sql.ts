@@ -106,7 +106,13 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
           .filter((a) => "ColumnDef" in a)
           .map((a) => {
             const { colname, typeName } = a.ColumnDef
-            const type = typeName.names.map(deparsePg).pop() as string
+            let type = typeName.names.map(deparsePg).pop() as string
+            if ((typeName as any).arrayBounds) {
+              type += "[]"
+            }
+            // if (colname === "accepted_providers" || type === "text") {
+            //   console.dir(a, { depth: null })
+            // }
             return { name: colname, type, query: deparsePg(a), comments: [] }
           }),
         query: deparsePg(stmt),
