@@ -13,9 +13,17 @@ import snakeToPascal from "snake-to-pascal"
 import sqlToTsType from "sql-to-ts-type"
 import prettier from "prettier"
 
+interface TreeToTypescriptOptions {
+  primarySchemaName?: string
+  injectedTypesDirectory?: string
+}
+
 export const treeToTypescriptModels = (
   db: DatabaseTree,
-  primarySchemaName?: string
+  {
+    primarySchemaName,
+    injectedTypesDirectory = "injected-types",
+  }: TreeToTypescriptOptions = {}
 ): { [filePath: string]: string } => {
   const project = new Project({
     useInMemoryFileSystem: true,
@@ -139,9 +147,23 @@ export const treeToTypescriptModels = (
         const propertyCanBeNull = !column.query.includes("NOT NULL")
         const propertyHasDefaultValue = column.query.includes("DEFAULT")
         const isPropertyOptional = propertyHasDefaultValue || propertyCanBeNull
-        const tsType = column.name.endsWith("_id")
-          ? snakeToPascal(column.name)
-          : sqlToTsType(column.type, propertyCanBeNull)
+        let tsType = sqlToTsType(column.type, propertyCanBeNull)
+
+        if (column.name.endsWith("_id")) tsType = snakeToPascal(column.name)
+
+        const injectedTypeComment = column.comments.find((comment) =>
+          comment.comment.includes("@type:")
+        )
+        if (injectedTypeComment) {
+          const typeToInject = injectedTypeComment.comment
+            .split("@type:")[1]
+            .trim()
+          tsType = typeToInject
+          tableFile.insertImportDeclaration(0, {
+            moduleSpecifier: `${injectedTypesDirectory}/${typeToInject}`,
+            defaultImport: typeToInject,
+          })
+        }
 
         tableInterfaceDeclaration.addProperty({
           name: column.name,

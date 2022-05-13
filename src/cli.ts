@@ -54,6 +54,9 @@ const argv = yargs(hideBin(process.argv))
           defaultSchema: {
             desc: "Set default schema",
           },
+          injectedTypesDirectory: {
+            desc: "Directory where injected types are stored",
+          },
         })
   )
   .options({
@@ -95,10 +98,10 @@ const commandMap = {
     } else {
       content = await loadStructureSQL(argv)
     }
-    const dirStructure = await treeToTypescriptModels(
-      getTreeFromSQL(content),
-      argv.defaultSchema
-    )
+    const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content), {
+      primarySchemaName: argv.defaultSchema,
+      injectedTypesDirectory: argv.injectedTypesDirectory,
+    })
     await dirStructureToFs({ dirStructure, outputDir: targetDir })
   },
 }
