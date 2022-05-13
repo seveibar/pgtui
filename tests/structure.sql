@@ -256,6 +256,7 @@ CREATE TABLE public.account_endpoint (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
+COMMENT ON COLUMN public.account_endpoint.params IS E'@type:InjectedAccountEndpointParams';
 
 ALTER TABLE public.account_endpoint OWNER TO postgres;
 

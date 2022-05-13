@@ -107,7 +107,7 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
           .map((a) => {
             const { colname, typeName } = a.ColumnDef
             const type = typeName.names.map(deparsePg).pop() as string
-            return { name: colname, type, query: deparsePg(a) }
+            return { name: colname, type, query: deparsePg(a), comments: [] }
           }),
         query: deparsePg(stmt),
         alterations: [],
@@ -259,12 +259,30 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       continue
     }
 
-    if (
-      "VariableSetStmt" in stmt ||
-      "SelectStmt" in stmt ||
-      "CommentStmt" in stmt
-    ) {
+    if ("VariableSetStmt" in stmt || "SelectStmt" in stmt) {
       db.misc.push({ query: deparsePg(stmt) })
+      continue
+    }
+
+    if ("CommentStmt" in stmt) {
+      if ((stmt.CommentStmt.objtype as string) === "OBJECT_COLUMN") {
+        try {
+          const [schema, table, columnName] = (
+            stmt as any
+          ).CommentStmt.object.List.items.map((item) => item.String.str)
+          const column = db.schemas[schema].tables[table].columns.find(
+            (col) => col.name === columnName
+          )
+          column.comments.push({
+            comment: stmt.CommentStmt.comment,
+            query: deparsePg(stmt),
+          })
+        } catch (e) {
+          db.misc.push({ query: deparsePg(stmt) })
+        }
+      } else {
+        db.misc.push({ query: deparsePg(stmt) })
+      }
       continue
     }
 

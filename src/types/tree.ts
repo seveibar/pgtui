@@ -2,6 +2,7 @@ export type Column = {
   name: string
   type: string
   query: string
+  comments: Array<{ comment: string; query: string }>
 }
 
 export type View = {

@@ -15,6 +15,7 @@ const argv = yargs(hideBin(process.argv))
       })
       .options({
         json: {
+          boolean: true,
           desc: "Dump as JSON",
         },
       })
