@@ -21,7 +21,7 @@ interface TreeToTypescriptOptions {
 export const treeToTypescriptModels = (
   db: DatabaseTree,
   {
-    primarySchemaName,
+    primarySchemaName = "public",
     injectedTypesDirectory = "injected-types",
   }: TreeToTypescriptOptions = {}
 ): { [filePath: string]: string } => {
@@ -34,39 +34,23 @@ export const treeToTypescriptModels = (
   indexFile.addImportDeclaration({
     moduleSpecifier: "./knex",
   })
-  let isPrimarySchemaNameValid = false
+  const isPrimarySchemaNameValid = Object.keys(db.schemas).includes(
+    primarySchemaName
+  )
+
+  if (isPrimarySchemaNameValid) {
+    indexFile.addExportDeclaration({
+      moduleSpecifier: `./${primarySchemaName}`,
+    })
+  }
 
   for (const [schemaName, schema] of Object.entries(db.schemas)) {
     if (Object.keys(schema.tables).length === 0) continue
 
-    isPrimarySchemaNameValid = Object.keys(db.schemas).includes(
-      primarySchemaName
-    )
-
-    if (!isPrimarySchemaNameValid && schemaName === "public") {
-      indexFile.addExportDeclaration({
-        moduleSpecifier: "./public",
-      })
-
-      continue
-    } else if (schemaName === primarySchemaName) {
-      indexFile.addExportDeclaration({
-        moduleSpecifier: `./${primarySchemaName}`,
-      })
-      indexFile.addExportDeclaration({
-        moduleSpecifier: "./public",
-        namespaceExport: "public_",
-      })
-
-      continue
-    }
-
-    if (schemaName !== "public") {
-      indexFile.addExportDeclaration({
-        moduleSpecifier: `./${schemaName}`,
-        namespaceExport: schemaName,
-      })
-    }
+    indexFile.addExportDeclaration({
+      moduleSpecifier: `./${schemaName}`,
+      namespaceExport: schemaName !== "public" ? schemaName : "public_",
+    })
   }
 
   const knexFile = project.createSourceFile("knex.ts", "")
