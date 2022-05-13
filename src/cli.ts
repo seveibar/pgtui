@@ -8,6 +8,17 @@ import treeToTypescriptModels from "tree-to-typescript-models"
 import { dirStructureToFs } from "dir-structure-to-fs"
 
 const argv = yargs(hideBin(process.argv))
+  .command("dump-structure", "Dump database structure into file", (yargs) =>
+    yargs
+      .positional("fileName", {
+        describe: "File name to dump to",
+      })
+      .options({
+        json: {
+          desc: "Dump as JSON",
+        },
+      })
+  )
   .command("dump-to-dir", "Dump database structure into directory", (yargs) =>
     yargs
       .positional("dir", {
@@ -55,6 +66,16 @@ const argv = yargs(hideBin(process.argv))
   .demandCommand().argv
 
 const commandMap = {
+  "dump-structure": async (argv) => {
+    const [, fileName] = argv._
+    const content = await loadStructureSQL(argv)
+    if (argv.json) {
+      const jsonContent = getTreeFromSQL(content)
+      await fs.writeFile(fileName, JSON.stringify(jsonContent, null, "  "))
+    } else {
+      await fs.writeFile(fileName, content)
+    }
+  },
   "dump-to-dir": async (argv) => {
     const [, targetDir] = argv._
     let content
