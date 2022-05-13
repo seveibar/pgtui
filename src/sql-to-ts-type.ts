@@ -16,7 +16,7 @@ export const sqlToTsType = (type: string, canBeNull: boolean): string => {
       break
 
     case "jsonb":
-      tsType = "object"
+      tsType = "any"
       break
 
     case "timestamptz":
