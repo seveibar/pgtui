@@ -114,6 +114,17 @@ export const treeToTypescriptModels = (
         ""
       )
 
+      for (const column of tableData.columns) {
+        if (column.name.endsWith("_id")) {
+          const columnTypeName = snakeToPascal(column.name)
+          tableFile.addTypeAlias({
+            name: columnTypeName,
+            type: "string",
+            isExported: true,
+          })
+        }
+      }
+
       const tableInterfaceDeclaration = tableFile.addInterface({
         name: pascaledTableName,
         isDefaultExport: true,
@@ -128,7 +139,9 @@ export const treeToTypescriptModels = (
         const propertyCanBeNull = !column.query.includes("NOT NULL")
         const propertyHasDefaultValue = column.query.includes("DEFAULT")
         const isPropertyOptional = propertyHasDefaultValue || propertyCanBeNull
-        const tsType = sqlToTsType(column.type, propertyCanBeNull)
+        const tsType = column.name.endsWith("_id")
+          ? snakeToPascal(column.name)
+          : sqlToTsType(column.type, propertyCanBeNull)
 
         tableInterfaceDeclaration.addProperty({
           name: column.name,
@@ -168,9 +181,6 @@ export const treeToTypescriptModels = (
     schemaIndexFile.saveSync()
   }
 
-  indexFile.saveSync()
-  knexFile.saveSync()
-
   const moduleDeclaration = knexFile.addModule({
     name: '"knex/types/tables"',
     hasDeclareKeyword: true,
@@ -188,6 +198,9 @@ export const treeToTypescriptModels = (
     extends: alias,
   }))
   moduleDeclaration.addInterfaces(addInterfaceTemplates)
+
+  indexFile.saveSync()
+  knexFile.saveSync()
 
   const filePaths = project.getFileSystem().globSync(["**/*.ts"])
 
