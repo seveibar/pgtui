@@ -203,6 +203,23 @@ export const treeToTypescriptModels = (
     schemaIndexFile.saveSync()
   }
 
+  for (const schema of Object.values(db.schemas)) {
+    for (const [tableName, tableData] of Object.entries(schema.tables)) {
+      for (const column of tableData.columns) {
+        if (column.name.endsWith("_id")) {
+          const columnTypeName = snakeToPascal(column.name)
+
+          const idExportDeclaration = indexFile.insertExportDeclaration(2, {
+            moduleSpecifier: `./${schema.name}/${snakeToPascal(tableName)}`,
+          })
+          idExportDeclaration.addNamedExport({
+            name: columnTypeName,
+          })
+        }
+      }
+    }
+  }
+
   const moduleDeclaration = knexFile.addModule({
     name: '"knex/types/tables"',
     hasDeclareKeyword: true,
