@@ -106,17 +106,6 @@ export const treeToTypescriptModels = (
         ""
       )
 
-      for (const column of tableData.columns) {
-        if (column.name.endsWith("_id")) {
-          const columnTypeName = snakeToPascal(column.name)
-          tableFile.addTypeAlias({
-            name: columnTypeName,
-            type: "string",
-            isExported: true,
-          })
-        }
-      }
-
       const tableInterfaceDeclaration = tableFile.addInterface({
         name: pascaledTableName,
         isDefaultExport: true,
@@ -172,6 +161,25 @@ export const treeToTypescriptModels = (
         name: tableName,
         type: pascaledTableName,
       })
+
+      for (const column of tableData.columns) {
+        if (column.name.endsWith("_id")) {
+          const columnTypeName = snakeToPascal(column.name)
+          tableFile.addTypeAlias({
+            name: columnTypeName,
+            type: "string",
+            isExported: true,
+          })
+
+          schemaIndexFile.addImportDeclaration({
+            moduleSpecifier: `./${pascaledTableName}`,
+            namedImports: [columnTypeName],
+          })
+          schemaIndexFileExportDeclaration.addNamedExport({
+            name: columnTypeName,
+          })
+        }
+      }
 
       initializermodelTypeMapDeclaration.addProperty({
         name: tableName,
