@@ -25,6 +25,7 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         tables: {},
         views: {},
         functions: {},
+        domains: {},
         grants: [],
         _tablelessSequences: {},
         owner: "",
@@ -58,6 +59,9 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         const [schemaname, funcname_raw] = targetName.split(".")
         const funcname = funcname_raw.split("(")[0].trim()
         db.schemas[schemaname].functions[funcname].owner = newowner.rolename
+      } else if (objectType === "OBJECT_DOMAIN") {
+        const [schema, domainname] = targetName.split('\n').map((t) => t.trim()).filter(t => t.length > 0)
+        db.schemas[schema].domains[domainname].owner = newowner.rolename
       } else {
         throw new Error(
           `Unsupported object type in AlterOwnerStmt: ${objectType}`
@@ -293,7 +297,22 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
     }
 
     if ("CreateDomainStmt" in stmt) {
-      db.misc.push({ query: deparsePg(stmt) })
+      const [schemaname, domainname] = deparsePg(stmt.CreateDomainStmt.domainname)
+        // TODO this replace may be due to a pgsql-parser bug, PR to fix it
+        .replace("\n\n", ".")
+        .split(".")
+
+      if (typeof domainname === "undefined") {
+        continue
+      }
+
+      createSchemaIfNotExists(schemaname)
+      db.schemas[schemaname].domains[domainname] = {
+        name: domainname,
+        type: deparsePg(stmt.CreateDomainStmt.typeName.names),
+        owner: ""
+      }
+
       continue
     }
 
