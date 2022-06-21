@@ -1,5 +1,4 @@
 import test from "ava"
-import pgknexlove from "pgknexlove"
 import getTreeFromSQL from "get-tree-from-sql"
 
 test("getTreeFromSQL", async (t) => {
@@ -10,8 +9,6 @@ test("getTreeFromSQL", async (t) => {
     );
     COMMENT ON COLUMN public.users.name IS E'@type: InjectedName';
   `)
-
-  // console.dir(tree, { depth: null })
 
   t.truthy(tree)
 })
