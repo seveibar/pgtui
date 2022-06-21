@@ -12,3 +12,15 @@ test("getTreeFromSQL", async (t) => {
 
   t.truthy(tree)
 })
+
+test("works with domains", async (t) => {
+  const tree = getTreeFromSQL(`
+    CREATE DOMAIN payload_jsonb AS jsonb;
+    CREATE TABLE public.events (
+      id serial PRIMARY KEY,
+      payload payload_jsonb NOT NULL
+    );
+  `)
+
+  t.truthy(tree)
+})
