@@ -1,5 +1,4 @@
 import test from "ava"
-import pgknexlove from "pgknexlove"
 import getTreeFromSQL from "get-tree-from-sql"
 
 test("getTreeFromSQL", async (t) => {
@@ -11,7 +10,17 @@ test("getTreeFromSQL", async (t) => {
     COMMENT ON COLUMN public.users.name IS E'@type: InjectedName';
   `)
 
-  // console.dir(tree, { depth: null })
+  t.truthy(tree)
+})
+
+test("works with domains", async (t) => {
+  const tree = getTreeFromSQL(`
+    CREATE DOMAIN payload_jsonb AS jsonb;
+    CREATE TABLE public.events (
+      id serial PRIMARY KEY,
+      payload payload_jsonb NOT NULL
+    );
+  `)
 
   t.truthy(tree)
 })

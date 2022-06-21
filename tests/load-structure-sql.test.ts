@@ -10,7 +10,7 @@ test("loadStructureSQL", async (t) => {
       name text NOT NULL
     );
   `)
-  const structureSQL = await loadStructureSQL()
+  const structureSQL = await loadStructureSQL((db as any).connection)
 
   t.truthy(structureSQL.includes("CREATE TABLE public.users ("))
   t.truthy(structureSQL.includes("id integer NOT NULL,"))

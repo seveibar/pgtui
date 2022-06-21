@@ -292,6 +292,11 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       continue
     }
 
+    if ("CreateDomainStmt" in stmt) {
+      db.misc.push({ query: deparsePg(stmt) })
+      continue
+    }
+
     throw new Error(`Unhandled stmt: "${Object.keys(stmt)[0]}"`)
   }
 
