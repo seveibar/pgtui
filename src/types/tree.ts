@@ -41,6 +41,11 @@ export type PgFunction = {
   owner: string
   query: string
 }
+export type Domain = {
+  name: string
+  owner: string
+  type: string
+}
 export type Sequence = {
   name: string
   query: string
@@ -83,6 +88,9 @@ export type Schema = {
   }
   functions: {
     [functionName: string]: PgFunction
+  }
+  domains: {
+    [domainName: string]: Domain
   }
   grants: Array<Grant>
   owner: string

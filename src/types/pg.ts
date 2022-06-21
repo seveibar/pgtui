@@ -8,6 +8,7 @@ export namespace pg {
     | VariableSetStmt
     | CreateStmt
     | CreateFunctionStmt
+    | CreateDomainStmt
     | CreateSchemaStmt
     | GrantStmt
     | CreatePolicyStmt
@@ -31,6 +32,7 @@ export namespace pg {
     | "OBJECT_TABLE"
     | "OBJECT_FUNCTION"
     | "OBJECT_SEQUENCE"
+    | "OBJECT_DOMAIN"
 
   export type IndexStmt = {
     IndexStmt: {
@@ -153,6 +155,14 @@ export namespace pg {
           arg: ValueObject
         }
       }>
+    }
+  }
+  export type CreateDomainStmt = {
+    CreateDomainStmt: {
+      domainname: Array<ValueObject>
+      typeName: {
+        names: Array<ValueObject>
+      }
     }
   }
   export type VariableSetStmt = { VariableSetStmt: {} }

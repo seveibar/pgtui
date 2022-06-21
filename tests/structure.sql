@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 13.2 (Debian 13.2-1.pgdg100+1)
--- Dumped by pg_dump version 13.3
+-- Dumped from database version 13.5 (Debian 13.5-1.pgdg110+1)
+-- Dumped by pg_dump version 14.3
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -50,11 +50,20 @@ CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
 
 --
--- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: 
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner:
 --
 
 COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
+
+--
+-- Name: endpoint_options_jsonb; Type: DOMAIN; Schema: public; Owner: postgres
+--
+
+CREATE DOMAIN public.endpoint_options_jsonb AS jsonb;
+
+
+ALTER DOMAIN public.endpoint_options_jsonb OWNER TO postgres;
 
 --
 -- Name: auth_account_id(); Type: FUNCTION; Schema: public; Owner: postgres
@@ -256,9 +265,15 @@ CREATE TABLE public.account_endpoint (
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
-COMMENT ON COLUMN public.account_endpoint.params IS E'@type:InjectedAccountEndpointParams';
 
 ALTER TABLE public.account_endpoint OWNER TO postgres;
+
+--
+-- Name: COLUMN account_endpoint.params; Type: COMMENT; Schema: public; Owner: postgres
+--
+
+COMMENT ON COLUMN public.account_endpoint.params IS '@type:InjectedAccountEndpointParams';
+
 
 --
 -- Name: account_endpoint; Type: VIEW; Schema: api; Owner: api_user
@@ -350,7 +365,7 @@ CREATE TABLE public.endpoint (
     endpoint_id uuid DEFAULT gen_random_uuid() NOT NULL,
     endpoint_name text NOT NULL,
     endpoint_key text NOT NULL,
-    endpoint_options jsonb,
+    endpoint_options public.endpoint_options_jsonb,
     endpoint_url text,
     official boolean DEFAULT false NOT NULL,
     owner_account_id uuid,
@@ -362,7 +377,7 @@ CREATE TABLE public.endpoint (
 ALTER TABLE public.endpoint OWNER TO postgres;
 
 --
--- Name: endpoint; Type: VIEW; Schema: api; Owner: api_user
+-- Name: endpoint; Type: VIEW; Schema: api; Owner: postgres
 --
 
 CREATE VIEW api.endpoint AS
@@ -378,7 +393,7 @@ CREATE VIEW api.endpoint AS
    FROM public.endpoint;
 
 
-ALTER TABLE api.endpoint OWNER TO api_user;
+ALTER TABLE api.endpoint OWNER TO postgres;
 
 --
 -- Name: meter; Type: TABLE; Schema: public; Owner: postgres
@@ -1030,3 +1045,6 @@ GRANT SELECT ON TABLE super_api.account_api_key TO api_user;
 -- PostgreSQL database dump complete
 --
 
+--
+-- PostgreSQL database cluster dump complete
+--
