@@ -60,7 +60,10 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         const funcname = funcname_raw.split("(")[0].trim()
         db.schemas[schemaname].functions[funcname].owner = newowner.rolename
       } else if (objectType === "OBJECT_DOMAIN") {
-        const [schema, domainname] = targetName.split('\n').map((t) => t.trim()).filter(t => t.length > 0)
+        const [schema, domainname] = targetName
+          .split("\n")
+          .map((t) => t.trim())
+          .filter((t) => t.length > 0)
         db.schemas[schema].domains[domainname].owner = newowner.rolename
       } else {
         throw new Error(
@@ -228,15 +231,16 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       const { is_grant, targtype, objtype, objects, grantees } = stmt.GrantStmt
       const targetName = deparsePg(objects)
       if (objtype === "OBJECT_SCHEMA") {
-        db.schemas[targetName].grants.push({
+        db.schemas[targetName]?.grants.push({
           query: deparsePg(stmt),
         })
       } else if (objtype === "OBJECT_TABLE") {
         const [schemaname, tablename] = targetName.split(".")
         const target =
-          db.schemas[schemaname].tables[tablename] ||
-          db.schemas[schemaname].views[tablename]
-        target.grants.push({
+          db.schemas[schemaname]?.tables[tablename] ??
+          db.schemas[schemaname]?.views[tablename]
+
+        target?.grants.push({
           query: deparsePg(stmt),
         })
       } else if (objtype === "OBJECT_SEQUENCE") {
@@ -297,7 +301,9 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
     }
 
     if ("CreateDomainStmt" in stmt) {
-      const [schemaname, domainname] = deparsePg(stmt.CreateDomainStmt.domainname)
+      const [schemaname, domainname] = deparsePg(
+        stmt.CreateDomainStmt.domainname
+      )
         // TODO this replace may be due to a pgsql-parser bug, PR to fix it
         .replace("\n\n", ".")
         .split(".")
@@ -310,7 +316,7 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       db.schemas[schemaname].domains[domainname] = {
         name: domainname,
         type: deparsePg(stmt.CreateDomainStmt.typeName.names),
-        owner: ""
+        owner: "",
       }
 
       continue
