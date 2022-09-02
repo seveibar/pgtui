@@ -45,7 +45,6 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
   }
 
   for (const stmt of statements) {
-    console.log("processing statement", stmt)
     if ("CreateSchemaStmt" in stmt) {
       createSchemaIfNotExists(stmt.CreateSchemaStmt.schemaname)
       continue
