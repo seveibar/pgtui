@@ -24,3 +24,11 @@ test("works with domains", async (t) => {
 
   t.truthy(tree)
 })
+
+test("works with grants", async (t) => {
+  const tree = getTreeFromSQL(`
+    GRANT USAGE ON SCHEMA public TO api_user;
+  `)
+
+  t.truthy(tree)
+})
