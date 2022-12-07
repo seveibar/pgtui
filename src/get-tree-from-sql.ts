@@ -54,17 +54,26 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       const { objectType, object, newowner } = stmt.AlterOwnerStmt
       const targetName = deparsePg(object)
       if (objectType === "OBJECT_SCHEMA") {
-        db.schemas[targetName].owner = newowner.rolename
+        const schema = db.schemas[targetName]
+        if (schema) {
+          schema.owner = newowner.rolename
+        }
       } else if (objectType === "OBJECT_FUNCTION") {
         const [schemaname, funcname_raw] = targetName.split(".")
         const funcname = funcname_raw.split("(")[0].trim()
-        db.schemas[schemaname].functions[funcname].owner = newowner.rolename
+        const schema = db.schemas[schemaname]
+        if (schema) {
+          schema.functions[funcname].owner = newowner.rolename
+        }
       } else if (objectType === "OBJECT_DOMAIN") {
         const [schema, domainname] = targetName
           .split("\n")
           .map((t) => t.trim())
           .filter((t) => t.length > 0)
-        db.schemas[schema].domains[domainname].owner = newowner.rolename
+        const dbSchema = db.schemas[schema]
+        if (dbSchema) {
+          dbSchema.domains[domainname].owner = newowner.rolename
+        }
       } else {
         throw new Error(
           `Unsupported object type in AlterOwnerStmt: ${objectType}`
