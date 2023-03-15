@@ -33,7 +33,8 @@
     "pg-formatter": "^1.2.0",
     "pg-query-parser": "^0.2.5",
     "pgknexlove": "^1.1.16",
-    "pgsql-parser": "^13.1.6",
+    "pgsql-parser": "13.3.11",
+    "pgsql-deparser": "13.3.11",
     "prettier": "^2.6.2",
     "tempy": "^2.0.0",
     "yargs": "^17.1.1"
