@@ -16,6 +16,8 @@ export namespace pg {
     | CreateExtensionStmt
     | CommentStmt
     | IndexStmt
+    | RuleStmt
+    | InsertStmt
 
   export type Expression =
     | ValueObject
@@ -203,6 +205,23 @@ export namespace pg {
         }
       }>
       qual: Expression
+    }
+  }
+
+  export type InsertStmt = {
+    InsertStmt: {
+      relation: Relation
+      selectStmt: any,
+      returningList: Array<any>
+    }
+  }
+
+  export type RuleStmt = {
+    RuleStmt: {
+      relation: Relation
+      rulename: string
+      instead: boolean
+      actions: Array<InsertStmt>
     }
   }
 }

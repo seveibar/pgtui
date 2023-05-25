@@ -36,6 +36,11 @@ export type Trigger = {
   query: string
 }
 
+export type Rule = {
+  name: string
+  query: string
+}
+
 export type PgFunction = {
   name: string
   owner: string
@@ -68,6 +73,9 @@ export type Table = {
   }
   triggers: {
     [triggerName: string]: Trigger
+  }
+  rules: {
+    [ruleName: string]: Rule
   }
   indexes: {
     [indexName: string]: Index

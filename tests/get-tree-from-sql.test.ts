@@ -35,8 +35,13 @@ test("works with grants", async (t) => {
 
 test("works with rules", async (t) => {
   const tree = getTreeFromSQL(`
-    CREATE RULE override_insert AS ON INSERT TO super_api.account_api_key DO INSTEAD (
-      INSERT INTO public.account_api_key
+    CREATE TABLE public.events (
+      id serial PRIMARY KEY,
+      payload jsonb NOT NULL
+    );
+
+    CREATE RULE override_insert AS ON INSERT TO public.events DO INSTEAD (
+      INSERT INTO public.events
       VALUES (NEW.*)
       RETURNING *
     );
