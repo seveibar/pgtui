@@ -32,3 +32,15 @@ test("works with grants", async (t) => {
 
   t.truthy(tree)
 })
+
+test("works with rules", async (t) => {
+  const tree = getTreeFromSQL(`
+    CREATE RULE override_insert AS ON INSERT TO super_api.account_api_key DO INSTEAD (
+      INSERT INTO public.account_api_key
+      VALUES (NEW.*)
+      RETURNING *
+    );
+  `)
+
+  t.truthy(tree)
+})

@@ -1040,7 +1040,6 @@ GRANT SELECT,USAGE ON SEQUENCE public.tree_tree_num_seq TO api_user;
 
 GRANT SELECT ON TABLE super_api.account_api_key TO api_user;
 
-
 --
 -- PostgreSQL database dump complete
 --
