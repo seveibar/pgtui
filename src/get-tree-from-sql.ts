@@ -126,6 +126,7 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         alterations: [],
         policies: {},
         triggers: {},
+        rules: {},
         indexes: {},
         sequences: [],
         grants: [],
@@ -317,6 +318,19 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         name: domainname,
         type: deparsePg(stmt.CreateDomainStmt.typeName.names),
         owner: "",
+      }
+
+      continue
+    }
+
+    if ("RuleStmt" in stmt) {
+      const schemaname = stmt.RuleStmt.relation.schemaname
+      const relname = stmt.RuleStmt.relation.relname
+
+      createSchemaIfNotExists(schemaname)
+      db.schemas[schemaname].tables[relname].rules[stmt.RuleStmt.rulename] = {
+        name: stmt.RuleStmt.rulename,
+        query: deparsePg(stmt),
       }
 
       continue

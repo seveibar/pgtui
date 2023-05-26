@@ -32,3 +32,20 @@ test("works with grants", async (t) => {
 
   t.truthy(tree)
 })
+
+test("works with rules", async (t) => {
+  const tree = getTreeFromSQL(`
+    CREATE TABLE public.events (
+      id serial PRIMARY KEY,
+      payload jsonb NOT NULL
+    );
+
+    CREATE RULE override_insert AS ON INSERT TO public.events DO INSTEAD (
+      INSERT INTO public.events
+      VALUES (NEW.*)
+      RETURNING *
+    );
+  `)
+
+  t.truthy(tree)
+})
