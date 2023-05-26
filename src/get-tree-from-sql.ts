@@ -32,6 +32,24 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       }
   }
 
+  function createTableIfNotExists(schemaname: string, tablename: string) {
+    const schema = db.schemas[schemaname]
+    if (!schema.tables[tablename])
+      schema.tables[tablename] = {
+        name: tablename,
+        columns: [],
+        indexes: {},
+        triggers: {},
+        grants: [],
+        owner: "",
+        sequences: [],
+        query: "",
+        policies: {},
+        rules: {},
+        alterations: []
+      }
+  }
+
   function findSequence(schemaname: string, sequencename: string) {
     const schema = db.schemas[schemaname]
     if (schema._tablelessSequences[sequencename])
@@ -133,7 +151,11 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         owner: "",
       }
       createSchemaIfNotExists(schemaname)
-      db.schemas[schemaname].tables[relname] = table
+      createTableIfNotExists(schemaname, relname)
+      db.schemas[schemaname].tables[relname] = {
+        ...db.schemas[schemaname].tables[relname],
+        ...table,
+      }
       continue
     }
 
@@ -328,6 +350,8 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       const relname = stmt.RuleStmt.relation.relname
 
       createSchemaIfNotExists(schemaname)
+      createTableIfNotExists(schemaname, relname)
+
       db.schemas[schemaname].tables[relname].rules[stmt.RuleStmt.rulename] = {
         name: stmt.RuleStmt.rulename,
         query: deparsePg(stmt),

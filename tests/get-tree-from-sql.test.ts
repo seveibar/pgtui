@@ -49,3 +49,20 @@ test("works with rules", async (t) => {
 
   t.truthy(tree)
 })
+
+test("works with rules when rule is defined first", async (t) => {
+  const tree = getTreeFromSQL(`
+    CREATE RULE override_insert AS ON INSERT TO public.events DO INSTEAD (
+      INSERT INTO public.events
+      VALUES (NEW.*)
+      RETURNING *
+    );
+
+    CREATE TABLE public.events (
+      id serial PRIMARY KEY,
+      payload jsonb NOT NULL
+    );
+  `)
+
+  t.truthy(tree)
+})
