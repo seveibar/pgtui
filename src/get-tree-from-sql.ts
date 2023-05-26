@@ -32,6 +32,24 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       }
   }
 
+  function createTableIfNotExists(schemaname: string, tablename: string) {
+    const schema = db.schemas[schemaname]
+    if (!schema.tables[tablename])
+      schema.tables[tablename] = {
+        name: tablename,
+        columns: [],
+        indexes: {},
+        triggers: {},
+        grants: [],
+        owner: "",
+        sequences: [],
+        query: "",
+        policies: {},
+        rules: {},
+        alterations: []
+      }
+  }
+
   function findSequence(schemaname: string, sequencename: string) {
     const schema = db.schemas[schemaname]
     if (schema._tablelessSequences[sequencename])
@@ -52,19 +70,29 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
 
     if ("AlterOwnerStmt" in stmt) {
       const { objectType, object, newowner } = stmt.AlterOwnerStmt
-      const targetName = deparsePg(object)
+      const targets = (object as any).List ? (object as any).List.items.map(item => deparsePg(item)) : [deparsePg(object)]
+
+      const targetName = targets[0]
       if (objectType === "OBJECT_SCHEMA") {
+        createSchemaIfNotExists(targetName)
         db.schemas[targetName].owner = newowner.rolename
       } else if (objectType === "OBJECT_FUNCTION") {
         const [schemaname, funcname_raw] = targetName.split(".")
         const funcname = funcname_raw.split("(")[0].trim()
         db.schemas[schemaname].functions[funcname].owner = newowner.rolename
       } else if (objectType === "OBJECT_DOMAIN") {
-        const [schema, domainname] = targetName
-          .split("\n")
-          .map((t) => t.trim())
-          .filter((t) => t.length > 0)
-        db.schemas[schema].domains[domainname].owner = newowner.rolename
+        if (targetName.includes("\n")) {
+          const [schema, domainname] = targetName
+            .split("\n")
+            .map((t) => t.trim())
+            .filter((t) => t.length > 0)
+          db.schemas[schema].domains[domainname].owner = newowner.rolename
+        } else {
+          const schema = targetName
+          const domainname = targets[1]
+
+          db.schemas[schema].domains[domainname].owner = newowner.rolename
+        }
       } else {
         throw new Error(
           `Unsupported object type in AlterOwnerStmt: ${objectType}`
@@ -133,7 +161,11 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
         owner: "",
       }
       createSchemaIfNotExists(schemaname)
-      db.schemas[schemaname].tables[relname] = table
+      createTableIfNotExists(schemaname, relname)
+      db.schemas[schemaname].tables[relname] = {
+        ...db.schemas[schemaname].tables[relname],
+        ...table,
+      }
       continue
     }
 
@@ -217,14 +249,20 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
 
     if ("AlterTableStmt" in stmt) {
       const { schemaname, relname } = stmt.AlterTableStmt.relation
+      createSchemaIfNotExists(schemaname)
+      createTableIfNotExists(schemaname, relname)
+
       const target =
         db.schemas[schemaname].tables[relname] ||
         db.schemas[schemaname].views[relname] ||
         db.schemas[schemaname]._tablelessSequences[relname]
 
-      target.alterations.push({
-        query: deparsePg(stmt),
-      })
+      try {
+        target.alterations.push({
+          query: deparsePg(stmt),
+        })
+      } catch (error) {}
+
       continue
     }
 
@@ -328,6 +366,8 @@ export const getTreeFromSQL = (content: string): DatabaseTree => {
       const relname = stmt.RuleStmt.relation.relname
 
       createSchemaIfNotExists(schemaname)
+      createTableIfNotExists(schemaname, relname)
+
       db.schemas[schemaname].tables[relname].rules[stmt.RuleStmt.rulename] = {
         name: stmt.RuleStmt.rulename,
         query: deparsePg(stmt),
