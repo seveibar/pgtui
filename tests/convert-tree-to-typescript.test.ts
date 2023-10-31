@@ -3,7 +3,6 @@ import test from "ava"
 import pgknexlove from "pgknexlove"
 import getTreeFromSQL from "get-tree-from-sql"
 import loadStructureSQL from "load-structure-sql"
-import getSQLFromTree from "get-sql-from-tree"
 import treeToTypescriptModels from "tree-to-typescript-models"
 
 test("check that structure is identical if sql created from tree is dumped from db", async (t) => {
