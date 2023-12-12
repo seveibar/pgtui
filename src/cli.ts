@@ -65,6 +65,7 @@ const argv = yargs(hideBin(process.argv))
     user: { desc: "Postgres User", alias: "U" },
     port: { desc: "Postgres Port", alias: "p" },
     database: { desc: "Postgres Database", alias: "W" },
+    ignoreErrors: { desc: "Ignore errors while parsing schema" },
   })
   .showHelpOnFail(true)
   .demandCommand().argv
@@ -74,7 +75,9 @@ const commandMap = {
     const [, fileName] = argv._
     const content = await loadStructureSQL(argv)
     if (argv.json) {
-      const jsonContent = getTreeFromSQL(content)
+      const jsonContent = getTreeFromSQL(content, {
+        ignoreErrors: argv.ignoreErrors,
+      })
       await fs.writeFile(fileName, JSON.stringify(jsonContent, null, "  "))
     } else {
       await fs.writeFile(fileName, content)
@@ -88,7 +91,13 @@ const commandMap = {
     } else {
       content = await loadStructureSQL(argv)
     }
-    await treeToDirectory(getTreeFromSQL(content), targetDir, argv)
+    await treeToDirectory(
+      getTreeFromSQL(content, {
+        ignoreErrors: argv.ignoreErrors,
+      }),
+      targetDir,
+      argv
+    )
   },
   "dump-typescript-models": async (argv) => {
     const [, targetDir] = argv._
@@ -98,10 +107,15 @@ const commandMap = {
     } else {
       content = await loadStructureSQL(argv)
     }
-    const dirStructure = await treeToTypescriptModels(getTreeFromSQL(content), {
-      primarySchemaName: argv.defaultSchema,
-      injectedTypesDirectory: argv.injectedTypesDirectory,
-    })
+    const dirStructure = await treeToTypescriptModels(
+      getTreeFromSQL(content, {
+        ignoreErrors: argv.ignoreErrors,
+      }),
+      {
+        primarySchemaName: argv.defaultSchema,
+        injectedTypesDirectory: argv.injectedTypesDirectory,
+      }
+    )
     await dirStructureToFs({ dirStructure, outputDir: targetDir })
   },
 }
