@@ -3,6 +3,18 @@
 pgtui is a command line interface for viewing a postgres schema or outputing a readable directory representation of a postgres schema
 
 ## Installation
+**Make sure [pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html) is installed on your system** which comes packaged with postgres. If you just want `postgresql-client` tools without the whole server you can install with... 
+
+Mac Homebrew:
+```
+brew install libpq
+echo 'export PATH="/usr/local/opt/libpq/bin:$PATH"' >> ~/.zshrc
+```
+
+Ubuntu:
+```
+sudo apt-get install -y postgresql-client
+```
 
 You can install pgtui globally like so:
 
