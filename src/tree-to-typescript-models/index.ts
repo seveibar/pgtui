@@ -133,7 +133,12 @@ export const treeToTypescriptModels = (
         const isPropertyOptional = propertyHasDefaultValue || propertyCanBeNull
         let tsType = sqlToTsType(column.type, propertyCanBeNull)
 
-        if (column.name.endsWith("_id")) tsType = snakeToPascal(column.name)
+        if (column.name.endsWith("_id")) {
+          const columnTypeName = snakeToPascal(column.name)
+          tsType = propertyCanBeNull
+            ? `${columnTypeName} | null`
+            : columnTypeName
+        }
 
         const injectedTypeComment = column.comments.find((comment) =>
           comment.comment.includes("@type:")
