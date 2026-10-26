@@ -7,20 +7,36 @@ export const sqlToTsType = (type: string, canBeNull: boolean): string => {
     case "text":
     case "uuid":
     case "varchar":
+    case "char":
+    case "character varying":
       tsType = "string"
       break
 
     case "int4":
     case "int":
+    case "integer":
+    case "int2":
+    case "smallint":
+    case "int8":
+    case "bigint":
+    case "serial":
+    case "bigserial":
+    case "numeric":
+    case "decimal":
+    case "real":
+    case "float4":
+    case "float8":
       tsType = "number"
       break
 
+    case "json":
     case "jsonb":
       tsType = "any"
       break
 
     case "timestamptz":
     case "timestamp":
+    case "date":
       tsType = "Date"
       break
 
